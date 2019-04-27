@@ -23,7 +23,7 @@ Test 코드로 인하여 ``Assembly Defintion``을 사용했습니다.
 ```csharp
 private void Awake()
 {
-  // 모노비헤비어를 상속받은 클래스에서 사용하고 싶을 때
+    // 모노비헤비어를 상속받은 클래스에서 사용하고 싶을 때
     SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
     // 모노비헤비어를 상속받지 않은 클래스에서 사용하고 싶을 때
     SCManagerGetComponent.DoUpdateGetComponentAttribute(this, p_pNotInherit_Mono);
@@ -60,7 +60,7 @@ private Transform p_pChildComponent_FindString = null;
 
 [SerializeField]
 [GetComponentInChildren(ETestChildObject.TestObject_Other_FindEnum)]
-//
+// Attribute 매개변수로 Enum이 들어간 경우입니다.
 private Transform p_pChildComponent_FindEnum = null;
 ```
 
