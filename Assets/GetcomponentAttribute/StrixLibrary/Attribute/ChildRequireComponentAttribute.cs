@@ -57,6 +57,13 @@ public class ChildRequireComponentAttribute :
         this.bIsPrint_OnNotFound = true;
     }
 
+    public ChildRequireComponentAttribute(System.Object pComponentName, bool bIsPrint_OnNotFound, int iOrder = 0)
+        : base(nameof(ChildRequireComponentAttribute), iOrder)
+    {
+        this.strComponentName = pComponentName.ToString();
+        this.bIsPrint_OnNotFound = bIsPrint_OnNotFound;
+    }
+
     public object GetComponent(MonoBehaviour pTargetMono, Type pElementType)
     {
         object pObjectArray = pTargetMono.GetComponentsInChildren_SameName(strComponentName, pElementType, true);
@@ -144,7 +151,16 @@ public class CChildRequireComponentAttribute_Drawer : OdinGroupDrawer<ChildRequi
         var property = this.Property;
         var attribute = this.Attribute;
 
-        SCManagerGetComponent.DoUpdateGetComponentAttribute(property.ParentValues[0] as MonoBehaviour);
+        object pObjectFieldOwner = property.ParentValues[0];
+        bool bTargetIsMono = property.ParentValues[0] is MonoBehaviour;
+        if(bTargetIsMono)
+            SCManagerGetComponent.DoUpdateGetComponentAttribute(property.ParentValues[0] as MonoBehaviour);
+        else
+        {
+            pObjectFieldOwner = property.ParentValues[0];
+            SCManagerGetComponent.DoUpdateGetComponentAttribute(property.Parent.ParentValues[0] as MonoBehaviour, property.ParentValues[0]);
+        }
+
 
         PropertyContext<TitleContext> context;
         if (property.Context.Get(this, "Title", out context))
@@ -209,7 +225,8 @@ public class CChildRequireComponentAttribute_Drawer : OdinGroupDrawer<ChildRequi
         }
         else
         {
-            if (Attribute.bIsPrint_OnNotFound_GetComponent == false)
+            var pAttribute = pPropertyChild.GetAttribute<ChildRequireComponentAttribute>();
+            if (pAttribute != null && pAttribute.bIsPrint_OnNotFound_GetComponent == false)
                 eCheckState = ECheckState.NotYet;
             else
                 eCheckState = ECheckState.Fail;

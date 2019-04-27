@@ -66,11 +66,11 @@ public class ChildRequireComponentAttribute_Example : MonoBehaviour {
 
     private void Awake()
     {
-        SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
+        // SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
         SCManagerGetComponent.DoUpdateGetComponentAttribute(this, p_pNotInherit_Mono);
 
-        if (p_pNotInherit_Mono_Property == null)
-            p_pNotInherit_Mono_Property = new InnerClass_NotInherit_Mono();
-        SCManagerGetComponent.DoUpdateGetComponentAttribute(this, p_pNotInherit_Mono_Property);
+        //if (p_pNotInherit_Mono_Property == null)
+        //    p_pNotInherit_Mono_Property = new InnerClass_NotInherit_Mono();
+        //SCManagerGetComponent.DoUpdateGetComponentAttribute(this, p_pNotInherit_Mono_Property);
     }
 }
