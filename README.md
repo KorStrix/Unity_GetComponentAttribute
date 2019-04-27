@@ -6,6 +6,9 @@
 
 ![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/Preview.gif?raw=true)
 
+- **상기 이미지는 오딘 에셋을 사용한 예시입니다.** 
+  - 오딘을 사용하지 않을 경우 Property, Dictionary 등이 인스펙터에 나타나지 않습니다.
+
 ## 참고한 프로젝트
 - https://openlevel.postype.com/post/683269
 
