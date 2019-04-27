@@ -114,6 +114,7 @@ public class GetComponentAttribute_Example : MonoBehaviour
 ```
 #### 5. ChildRequireComponentAttribute
 - 자식 오브젝트중에 같은 이름으로 된 해당 타입의 오브젝트가 할당되었는지 인스펙터에 한눈에 파악할 수 있도록 보여줍니다.
+  - **Play Mode가 Edit Mode일 경우에도 자동으로 할당하여 체크합니다.**
   - **오딘을 사용할 경우 밑에 따로 한곳에 나열되어 나타납니다.**
 
 - **Before Odin**
