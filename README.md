@@ -1,6 +1,6 @@
 # Unity-GetComponent-Attribute
 
-유니티에서 자주 사용되는** GetComponent, GetComponentInParents, GetComponentInChildren 등을**
+유니티에서 자주 사용되는 **GetComponent, GetComponentInParents, GetComponentInChildren 등을**
 
 속성으로 구현하여 **원하는 때에 해당 변수나 프로퍼티에 자동으로 할당** 할 수 있는 프로젝트입니다.
 
