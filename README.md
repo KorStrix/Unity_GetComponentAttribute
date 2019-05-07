@@ -6,8 +6,54 @@
 
 ![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/Preview.gif?raw=true)
 
-- **상기 이미지는 오딘 에셋을 사용한 예시입니다.** 
+- **상기 이미지는 오딘 에셋을 사용한 예시입니다.**
   - 오딘을 사용하지 않을 경우 Property, Dictionary 등이 인스펙터에 나타나지 않습니다.
+  - **(Property, Dictionary도 동작은 정상동작합니다. 인스펙터에 그려지지만 않을 뿐입니다.)**
+
+
+  ```csharp
+  // Before
+  // 기존 작업 방식은 public이나
+  public GameObject pLegacyWorkflow_Public_Inspector_Link;
+
+  // (private || protected) && SerilizeField로 변경 후 인스펙터에 일일이 드래그 & 드랍방식
+  [SerializeField]
+  private GameObject pLegacyWorkflow_Private_Inspector_Link;
+
+  [SerializeField]
+  private GameObject pLegacyWorkflow_Private_InScript;
+
+  public Rigidbody pLegacyWorkflow_Property { get; private set; }
+
+
+  private void Awake()
+  {
+    // 혹은 스크립트에 일일이 할당하는 로직
+    pLegacyWorkflow_Private_InScript = FindChildObject("Require Object Name");
+    pLegacyWorkflow_Property = GetComponentInChildren<Rigidbody>();
+  }
+
+  private GameObject FindChildObject(string strObjectName)
+  {
+    Transform[] arrAllChildObject = GetComponentsInChildren<Transform>();
+    // 포문으로 돌리며 이름으로 찾아서 리턴하는 로직
+  }
+
+  // --------------------------- After ---------------------------
+
+  [GetComponentInChildren("Somthing Require GameObject Name In Children")]
+  private GameObject pPrivate_Find_Name;
+
+  [GetComponentInChildren]
+  public Rigidbody pProperty { get; private set; }
+
+  void Awake()
+  {
+    // 아래 코드 한줄로 모든 GetComponentAttribute의 필드 혹은 Property가 할당됩니다.
+    SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
+  }
+  ```
+
 
 ## 참고한 프로젝트
 - https://openlevel.postype.com/post/683269
@@ -115,7 +161,7 @@ public class GetComponentAttribute_Example : MonoBehaviour
   }
 }
 ```
-#### 5. ChildRequireComponentAttribute
+#### 5. ChildRequireComponentAttribute (동봉된 별도의 Attribute입니다.)
 - 자식 오브젝트중에 같은 이름으로 된 해당 타입의 오브젝트가 할당되었는지 인스펙터에 한눈에 파악할 수 있도록 보여줍니다.
   - **Play Mode가 Edit Mode일 경우에도 자동으로 할당하여 체크합니다.**
   - **오딘을 사용할 경우 밑에 따로 한곳에 나열되어 나타납니다.**
@@ -124,7 +170,7 @@ public class GetComponentAttribute_Example : MonoBehaviour
 
 ![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/ChildRequireComponent_BeforeOdin.png?raw=true)
 
-- **After Odin** 위와 같은 스크립트지만 프로퍼티 및 Dictionary가 Inspector에 나타납니다.
+- **After Odin** 위와 같은 스크립트지만 프로퍼티 및 Dictionary가 Inspector에 나타며, 맨 밑에 한 곳에 몰아서 리스트를 그려줍니다.
 
 ![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/ChildRequireComponent_AfterOdin.png?raw=true)
 
