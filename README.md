@@ -10,7 +10,15 @@
   - 오딘을 사용하지 않을 경우 Property, Dictionary 등이 인스펙터에 나타나지 않습니다.
   - **(Property, Dictionary도 동작은 정상동작합니다. 인스펙터에 그려지지만 않을 뿐입니다.)**
 
+<br>
+<br>
+# 설계도
+![](
+https://github.com/KorStrix/korstrix.github.io/blob/master/_images/GetComponent%20Attribute.png?raw=true)
 
+<br>
+<br>
+# 예시 코드
   ```csharp
   // Before
   // 기존 작업 방식은 public이나
@@ -54,72 +62,75 @@
   }
   ```
 
-
----
+<br>
+<br>
 ## 성능 테스트
-
 Unity의 GetComponent 함수와 transform Property, Attribute 성능 비교 코드입니다.
 
 ```csharp
 string strTestCase = ETestCase.GetComponent_DefulatProperty.ToString();
-           for(int i = 0; i < iTestCase; i++)
-           {
-               SCManagerProfiler.DoStartTestCase(strTestCase);
-               GetComponent_Property = null;
-               GetComponent_Property = transform;
-               GetComponent_Property.GetType();
-               SCManagerProfiler.DoFinishTestCase(strTestCase);
-           }
+ for(int i = 0; i < iTestCase; i++)
+ {
+     SCManagerProfiler.DoStartTestCase(strTestCase);
+     GetComponent_Property = null;
+     GetComponent_Property = transform;
+     GetComponent_Property.GetType();
+     SCManagerProfiler.DoFinishTestCase(strTestCase);
+ }
 
-           strTestCase = ETestCase.GetComponet_Function.ToString();
-           for (int i = 0; i < iTestCase; i++)
-           {
-               SCManagerProfiler.DoStartTestCase(strTestCase);
-               GetComponent_Function = null;
-               GetComponent_Function = GetComponent<Transform>();
-               GetComponent_Function.GetType();
-               SCManagerProfiler.DoFinishTestCase(strTestCase);
-           }
+ strTestCase = ETestCase.GetComponet_Function.ToString();
+ for (int i = 0; i < iTestCase; i++)
+ {
+     SCManagerProfiler.DoStartTestCase(strTestCase);
+     GetComponent_Function = null;
+     GetComponent_Function = GetComponent<Transform>();
+     GetComponent_Function.GetType();
+     SCManagerProfiler.DoFinishTestCase(strTestCase);
+ }
 
-           strTestCase = ETestCase.GetComponetsInChildren_Function.ToString();
-           for (int i = 0; i < iTestCase; i++)
-           {
-               SCManagerProfiler.DoStartTestCase(strTestCase);
-               GetComponentsChildren_Children_Function = null;
-               GetComponentsChildren_Children_Function = GetComponentsInChildren<Transform>();
-               GetComponentsChildren_Children_Function[0].GetType();
-               SCManagerProfiler.DoFinishTestCase(strTestCase);
-           }
+ strTestCase = ETestCase.GetComponetsInChildren_Function.ToString();
+ for (int i = 0; i < iTestCase; i++)
+ {
+     SCManagerProfiler.DoStartTestCase(strTestCase);
+     GetComponentsChildren_Children_Function = null;
+     GetComponentsChildren_Children_Function = GetComponentsInChildren<Transform>();
+     GetComponentsChildren_Children_Function[0].GetType();
+     SCManagerProfiler.DoFinishTestCase(strTestCase);
+ }
 
-           strTestCase = ETestCase.GetComponet_Attribute_Individual.ToString();
-           for (int i = 0; i < iTestCase; i++)
-           {
-               SCManagerProfiler.DoStartTestCase(strTestCase);
-               GetComponent_Attribute = null;
-               SCManagerGetComponent.DoUpdateGetComponentAttribute(this, this, pMemberInfo);
-               GetComponent_Attribute.GetType();
-               SCManagerProfiler.DoFinishTestCase(strTestCase);
-           }
+ strTestCase = ETestCase.GetComponet_Attribute_Individual.ToString();
+ for (int i = 0; i < iTestCase; i++)
+ {
+     SCManagerProfiler.DoStartTestCase(strTestCase);
+     GetComponent_Attribute = null;
+     SCManagerGetComponent.DoUpdateGetComponentAttribute(this, this, pMemberInfo);
+     GetComponent_Attribute.GetType();
+     SCManagerProfiler.DoFinishTestCase(strTestCase);
+ }
 
-           strTestCase = ETestCase.GetComponet_Attribute_All.ToString();
-           for (int i = 0; i < iTestCase; i++)
-           {
-               SCManagerProfiler.DoStartTestCase(strTestCase);
-               GetComponentsChildren_Children_Attribute = null;
-               SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
-               GetComponentsChildren_Children_Attribute[0].GetType();
-               SCManagerProfiler.DoFinishTestCase(strTestCase);
-           }
+ strTestCase = ETestCase.GetComponet_Attribute_All.ToString();
+ for (int i = 0; i < iTestCase; i++)
+ {
+     SCManagerProfiler.DoStartTestCase(strTestCase);
+     GetComponentsChildren_Children_Attribute = null;
+     SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
+     GetComponentsChildren_Children_Attribute[0].GetType();
+     SCManagerProfiler.DoFinishTestCase(strTestCase);
+ }
 
-           SCManagerProfiler.DoPrintResult_PrintLog_IsError(true);
+ SCManagerProfiler.DoPrintResult_PrintLog_IsError(true);
 ```
 
+<br>
 ### 성능 결과
 1만번 호출 결과 GetComponent Property나 함수의 경우 밀리 세컨드단위로 떨어질정도로 작지만,
 GetComponentAttribute도 1초정도로 짧으며, 빌드 후에는 더 짧습니다.
 
 ![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/Profiler.png?raw=true)
 
+<br>
+<br>
+<br>
 ## 참고한 프로젝트
 - https://openlevel.postype.com/post/683269
 
@@ -156,6 +167,9 @@ private Transform pTransform2 = null; // 컴파일러가 경고를 출력하지 
 
 #### 1. 유니티가 지원하는 GetComponent, GetComponents, GetComponenInParents, GetComponentInChildren, GetComponentsInChildren 등을 지원
 
+<br>
+<br>
+<br>
 #### 2. GetComponentInChildren Attribute
 - 하위 오브젝트에 **같은 타입의 오브젝트가 여러개 있을 경우, 이름으로 찾아서 할당하는 기능**
 
@@ -178,6 +192,9 @@ private Transform p_pChildComponent_FindString = null;
 private Transform p_pChildComponent_FindEnum = null;
 ```
 
+<br>
+<br>
+<br>
 - Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
 
 ```csharp
@@ -195,6 +212,9 @@ private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<str
 Transform[] arrComponent = null;
 ```
 
+<br>
+<br>
+<br>
 #### 3. 변수, 프로퍼티 구분없이 지원
 - **주의사항으로, set 한정자는 해당 클래스가 접근이 가능하게 해야 합니다.**
 
@@ -203,6 +223,9 @@ Transform[] arrComponent = null;
 public Transform p_pChildComponent_FindEnumProperty { get; private set; }
 ```
 
+<br>
+<br>
+<br>
 #### 4. Monobehaviour를 상속받지 않은 클래스도 지원
 ```csharp
 public class GetComponentAttribute_Example : MonoBehaviour
@@ -226,6 +249,10 @@ public class GetComponentAttribute_Example : MonoBehaviour
   }
 }
 ```
+
+<br>
+<br>
+<br>
 #### 5. ChildRequireComponentAttribute (동봉된 별도의 Attribute입니다.)
 - 자식 오브젝트중에 같은 이름으로 된 해당 타입의 오브젝트가 할당되었는지 인스펙터에 한눈에 파악할 수 있도록 보여줍니다.
   - **Play Mode가 Edit Mode일 경우에도 자동으로 할당하여 체크합니다.**
@@ -235,11 +262,17 @@ public class GetComponentAttribute_Example : MonoBehaviour
 
 ![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/ChildRequireComponent_BeforeOdin.png?raw=true)
 
+<br>
+<br>
+<br>
 - **After Odin** 위와 같은 스크립트지만 프로퍼티 및 Dictionary가 Inspector에 나타며, 맨 밑에 한 곳에 몰아서 리스트를 그려줍니다.
 
 ![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/ChildRequireComponent_AfterOdin.png?raw=true)
 
 
+<br>
+<br>
+<br>
 ## 연락처
 유니티 개발자 모임 카카오톡 & 디스코드 링크입니다.
 
