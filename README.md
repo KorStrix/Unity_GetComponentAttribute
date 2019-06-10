@@ -14,12 +14,14 @@
 
 <br>
 <br>
+
 # 설계도
 ![](
 https://github.com/KorStrix/korstrix.github.io/blob/master/_images/GetComponent%20Attribute.png?raw=true)
 
 <br>
 <br>
+
 # 예시 코드
 
 ```csharp
@@ -67,6 +69,7 @@ void Awake()
 
 <br>
 <br>
+
 ## 성능 테스트
 Unity의 GetComponent 함수와 transform Property, Attribute 성능 비교 코드입니다.
 
@@ -125,6 +128,7 @@ string strTestCase = ETestCase.GetComponent_DefulatProperty.ToString();
 ```
 
 <br>
+
 ### 성능 결과
 1만번 호출 결과 GetComponent Property나 함수의 경우 밀리 세컨드단위로 떨어질정도로 작지만,
 GetComponentAttribute도 1초정도로 짧으며, 빌드 후에는 더 짧습니다.
@@ -134,6 +138,7 @@ GetComponentAttribute도 1초정도로 짧으며, 빌드 후에는 더 짧습니
 <br>
 <br>
 <br>
+
 ## 참고한 프로젝트
 - https://openlevel.postype.com/post/683269
 
@@ -145,7 +150,6 @@ GetComponentAttribute도 1초정도로 짧으며, 빌드 후에는 더 짧습니
 Test 코드로 인하여 ``Assembly Defintion``을 사용했습니다.
 
 ## 사용 주의사항
-
 - Awake시 다음과 같이 Manager의 함수를 호출해야 합니다.
 
 ```csharp
