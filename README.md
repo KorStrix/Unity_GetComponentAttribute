@@ -21,6 +21,7 @@ https://github.com/KorStrix/korstrix.github.io/blob/master/_images/GetComponent%
 <br>
 <br>
 # 예시 코드
+
 ```csharp
 // Before
 // 기존 작업 방식은 public이나
