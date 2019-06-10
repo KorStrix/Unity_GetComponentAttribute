@@ -15,13 +15,6 @@
 <br>
 <br>
 
-# 설계도
-![](
-https://github.com/KorStrix/korstrix.github.io/blob/master/_images/GetComponent%20Attribute.png?raw=true)
-
-<br>
-<br>
-
 # 예시 코드
 
 ```csharp
@@ -138,9 +131,6 @@ GetComponentAttribute도 1초정도로 짧으며, 빌드 후에는 더 짧습니
 <br>
 <br>
 <br>
-
-## 참고한 프로젝트
-- https://openlevel.postype.com/post/683269
 
 ## 설치 주의사항
 유니티 `2017 ~ 2018버젼까지 동작 확인`하였으며,
@@ -293,6 +283,9 @@ public class GetComponentAttribute_Example : MonoBehaviour
 <br>
 <br>
 <br>
+
+## 참고한 프로젝트
+- https://openlevel.postype.com/post/683269
 
 ## 연락처
 유니티 개발자 모임 카카오톡 & 디스코드 링크입니다.
