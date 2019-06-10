@@ -1,5 +1,7 @@
 # Unity-GetComponent-Attribute
 
+[Unity GetComponent Attribute 블로그 글 링크](https://github.com/KorStrix/Unity_GetComponentAttribute)
+
 유니티에서 자주 사용되는 **GetComponent, GetComponentInParents, GetComponentInChildren 등을**
 
 속성으로 구현하여 **원하는 때에 해당 변수나 프로퍼티에 자동으로 할당** 할 수 있는 프로젝트입니다.
@@ -19,48 +21,48 @@ https://github.com/KorStrix/korstrix.github.io/blob/master/_images/GetComponent%
 <br>
 <br>
 # 예시 코드
-  ```csharp
-  // Before
-  // 기존 작업 방식은 public이나
-  public GameObject pLegacyWorkflow_Public_Inspector_Link;
+```csharp
+// Before
+// 기존 작업 방식은 public이나
+public GameObject pLegacyWorkflow_Public_Inspector_Link;
 
-  // (private || protected) && SerilizeField로 변경 후 인스펙터에 일일이 드래그 & 드랍방식
-  [SerializeField]
-  private GameObject pLegacyWorkflow_Private_Inspector_Link;
+// (private || protected) && SerilizeField로 변경 후 인스펙터에 일일이 드래그 & 드랍방식
+[SerializeField]
+private GameObject pLegacyWorkflow_Private_Inspector_Link;
 
-  [SerializeField]
-  private GameObject pLegacyWorkflow_Private_InScript;
+[SerializeField]
+private GameObject pLegacyWorkflow_Private_InScript;
 
-  public Rigidbody pLegacyWorkflow_Property { get; private set; }
+public Rigidbody pLegacyWorkflow_Property { get; private set; }
 
 
-  private void Awake()
-  {
-    // 혹은 스크립트에 일일이 할당하는 로직
-    pLegacyWorkflow_Private_InScript = FindChildObject("Require Object Name");
-    pLegacyWorkflow_Property = GetComponentInChildren<Rigidbody>();
-  }
+private void Awake()
+{
+  // 혹은 스크립트에 일일이 할당하는 로직
+  pLegacyWorkflow_Private_InScript = FindChildObject("Require Object Name");
+  pLegacyWorkflow_Property = GetComponentInChildren<Rigidbody>();
+}
 
-  private GameObject FindChildObject(string strObjectName)
-  {
-    Transform[] arrAllChildObject = GetComponentsInChildren<Transform>();
-    // 포문으로 돌리며 이름으로 찾아서 리턴하는 로직
-  }
+private GameObject FindChildObject(string strObjectName)
+{
+  Transform[] arrAllChildObject = GetComponentsInChildren<Transform>();
+  // 포문으로 돌리며 이름으로 찾아서 리턴하는 로직
+}
 
-  // --------------------------- After ---------------------------
+// --------------------------- After ---------------------------
 
-  [GetComponentInChildren("Somthing Require GameObject Name In Children")]
-  private GameObject pPrivate_Find_Name;
+[GetComponentInChildren("Somthing Require GameObject Name In Children")]
+private GameObject pPrivate_Find_Name;
 
-  [GetComponentInChildren]
-  public Rigidbody pProperty { get; private set; }
+[GetComponentInChildren]
+public Rigidbody pProperty { get; private set; }
 
-  void Awake()
-  {
-    // 아래 코드 한줄로 모든 GetComponentAttribute의 필드 혹은 Property가 할당됩니다.
-    SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
-  }
-  ```
+void Awake()
+{
+  // 아래 코드 한줄로 모든 GetComponentAttribute의 필드 혹은 Property가 할당됩니다.
+  SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
+}
+```
 
 <br>
 <br>
@@ -269,6 +271,11 @@ public class GetComponentAttribute_Example : MonoBehaviour
 
 ![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/ChildRequireComponent_AfterOdin.png?raw=true)
 
+
+<br>
+<br>
+<br>
+[Unity GetComponent Attribute 블로그 글 링크](https://github.com/KorStrix/Unity_GetComponentAttribute)
 
 <br>
 <br>
