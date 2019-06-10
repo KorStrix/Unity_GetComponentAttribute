@@ -101,24 +101,7 @@ public class ChildRequireComponentAttribute : PropertyAttribute, IGetComponentAt
 
     public object GetComponent(MonoBehaviour pTargetMono, Type pElementType)
     {
-        object pObjectReturn;
-
-        MethodInfo getter = typeof(MonoBehaviour)
-                    .GetMethod("GetComponentsInChildren", new Type[] { typeof(bool) })
-                    .MakeGenericMethod(pElementType);
-
-        if (pElementType == typeof(GameObject))
-        {
-            getter = typeof(MonoBehaviour)
-            .GetMethod("GetComponentsInChildren", new Type[] { typeof(bool) })
-            .MakeGenericMethod(typeof(Transform));
-
-            pObjectReturn = GetComponentAttributeBase.Convert_TransformArray_To_GameObjectArray(pTargetMono, getter.Invoke(pTargetMono, new object[] { true }));
-        }
-        else
-            pObjectReturn = getter.Invoke(pTargetMono, new object[] { true });
-
-        return SCManagerGetComponent.ExtractSameNameList(strComponentName, pObjectReturn as UnityEngine.Object[]).ToArray();
+        return SCManagerGetComponent.Event_GetComponentInChildren(pTargetMono, pElementType, true, true, strComponentName);
     }
 }
 #endif
