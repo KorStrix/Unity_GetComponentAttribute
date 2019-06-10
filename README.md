@@ -161,6 +161,10 @@ private Transform pTransform; // 컴파일러가 경고 출력
 private Transform pTransform2 = null; // 컴파일러가 경고를 출력하지 않음
 ```
 
+<br>
+<br>
+<br>
+
 ## 기능들
 
 #### 1. 유니티가 지원하는 GetComponent, GetComponents, GetComponenInParents, GetComponentInChildren, GetComponentsInChildren 등을 지원
