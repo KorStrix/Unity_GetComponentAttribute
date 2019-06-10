@@ -170,6 +170,7 @@ private Transform pTransform; // 컴파일러가 경고 출력
 [GetComponent]
 private Transform pTransform2 = null; // 컴파일러가 경고를 출력하지 않음
 ```
+
 ## 기능들
 
 #### 1. 유니티가 지원하는 GetComponent, GetComponents, GetComponenInParents, GetComponentInChildren, GetComponentsInChildren 등을 지원
@@ -177,6 +178,7 @@ private Transform pTransform2 = null; // 컴파일러가 경고를 출력하지 
 <br>
 <br>
 <br>
+
 #### 2. GetComponentInChildren Attribute
 - 하위 오브젝트에 **같은 타입의 오브젝트가 여러개 있을 경우, 이름으로 찾아서 할당하는 기능**
 
@@ -202,6 +204,7 @@ private Transform p_pChildComponent_FindEnum = null;
 <br>
 <br>
 <br>
+
 - Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
 
 ```csharp
@@ -222,6 +225,7 @@ Transform[] arrComponent = null;
 <br>
 <br>
 <br>
+
 #### 3. 변수, 프로퍼티 구분없이 지원
 - **주의사항으로, set 한정자는 해당 클래스가 접근이 가능하게 해야 합니다.**
 
@@ -233,6 +237,7 @@ public Transform p_pChildComponent_FindEnumProperty { get; private set; }
 <br>
 <br>
 <br>
+
 #### 4. Monobehaviour를 상속받지 않은 클래스도 지원
 ```csharp
 public class GetComponentAttribute_Example : MonoBehaviour
@@ -260,6 +265,7 @@ public class GetComponentAttribute_Example : MonoBehaviour
 <br>
 <br>
 <br>
+
 #### 5. ChildRequireComponentAttribute (동봉된 별도의 Attribute입니다.)
 - 자식 오브젝트중에 같은 이름으로 된 해당 타입의 오브젝트가 할당되었는지 인스펙터에 한눈에 파악할 수 있도록 보여줍니다.
   - **Play Mode가 Edit Mode일 경우에도 자동으로 할당하여 체크합니다.**
@@ -272,6 +278,7 @@ public class GetComponentAttribute_Example : MonoBehaviour
 <br>
 <br>
 <br>
+
 - **After Odin** 위와 같은 스크립트지만 프로퍼티 및 Dictionary가 Inspector에 나타며, 맨 밑에 한 곳에 몰아서 리스트를 그려줍니다.
 
 ![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/ChildRequireComponent_AfterOdin.png?raw=true)
@@ -280,11 +287,13 @@ public class GetComponentAttribute_Example : MonoBehaviour
 <br>
 <br>
 <br>
+
 [Unity GetComponent Attribute 블로그 글 링크](https://github.com/KorStrix/Unity_GetComponentAttribute)
 
 <br>
 <br>
 <br>
+
 ## 연락처
 유니티 개발자 모임 카카오톡 & 디스코드 링크입니다.
 
