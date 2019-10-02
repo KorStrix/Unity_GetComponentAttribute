@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
@@ -10,13 +10,6 @@ namespace StrixLibrary_Test
     public class Test_ComponentParents : MonoBehaviour { }
     public class Test_ComponentChild : MonoBehaviour { }
     public class Test_ComponentOnly : MonoBehaviour { }
-    public class Test_ComponentChild_DerivedDictionaryItem : MonoBehaviour, IDictionaryItem<GetComponentAttribute_Test.ETestChildObject>
-    {
-        public GetComponentAttribute_Test.ETestChildObject IDictionaryItem_GetKey()
-        {
-            return name.ConvertEnum<GetComponentAttribute_Test.ETestChildObject>();
-        }
-    }
 
     [Category("StrixLibrary")]
     public class GetComponentAttribute_Test : MonoBehaviour
@@ -129,6 +122,15 @@ namespace StrixLibrary_Test
                 Assert.IsTrue(pIterEnum.Current.Key.ToString() == pIterEnum.Current.Value.name.ToString());
         }
 
+#if STRIX_LIBRARY
+        public class Test_ComponentChild_DerivedDictionaryItem : MonoBehaviour, IDictionaryItem<GetComponentAttribute_Test.ETestChildObject>
+        {
+            public GetComponentAttribute_Test.ETestChildObject IDictionaryItem_GetKey()
+            {
+                return name.ConvertEnum<GetComponentAttribute_Test.ETestChildObject>();
+            }
+        }
+
         [Test]
         static public void GetComponent_Child_Enum_Test()
         {
@@ -148,6 +150,7 @@ namespace StrixLibrary_Test
             while (pIterEnum.MoveNext())
                 Assert.IsTrue(pIterEnum.Current.Key.ToString() == pIterEnum.Current.Value.name.ToString());
         }
+#endif
 
         [Test]
         static public void GetComponentChildren_Property_Test()
