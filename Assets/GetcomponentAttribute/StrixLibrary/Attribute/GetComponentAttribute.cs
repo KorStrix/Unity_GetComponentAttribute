@@ -1,4 +1,4 @@
-﻿#region Header
+#region Header
 /* ============================================ 
  *			    Strix Unity Library
  *		https://github.com/KorStrix/UnityLibrary
@@ -375,7 +375,7 @@ static public class SCManagerGetComponent
                                 pType_DictionaryKey, pType_DictionaryValue });
 
         var pInstanceDictionary = System.Activator.CreateInstance(pTypeField);
-        bool bIsDrived_DictionaryItem = CheckIsDERIVED_DictionaryItem(pType_DictionaryValue.GetInterfaces(), typeof(IDictionaryItem<>).Name);
+        bool bIsDrived_DictionaryItem = CheckIsDERIVED_DictionaryItem(pType_DictionaryValue.GetInterfaces());
 
         if (pType_DictionaryKey == typeof(string))
         {
@@ -427,8 +427,10 @@ static public class SCManagerGetComponent
         return pComponent;
     }
 
-    static private bool CheckIsDERIVED_DictionaryItem(Type[] arrInterfaces, string strTypeName)
+    static private bool CheckIsDERIVED_DictionaryItem(Type[] arrInterfaces)
     {
+#if STRIX_LIBRARY
+        string strTypeName = typeof(IDictionaryItem<>).Name;
         bool bIsDerived_DictionaryItem = false;
         for (int i = 0; i < arrInterfaces.Length; i++)
         {
@@ -440,6 +442,9 @@ static public class SCManagerGetComponent
         }
 
         return bIsDerived_DictionaryItem;
+#else
+        return false;
+#endif
     }
 
     static private GameObject[] Convert_TransformArray_To_GameObjectArray(MonoBehaviour pTargetMono, object pObject)
