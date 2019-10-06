@@ -23,65 +23,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
-static public class Extension_MemberInfo
-{
-    static public System.Type MemberType(this MemberInfo pMemberInfo)
-    {
-        FieldInfo pFieldInfo = pMemberInfo as FieldInfo;
-        if (pFieldInfo != null)
-            return pFieldInfo.FieldType;
-
-        PropertyInfo pProperty = pMemberInfo as PropertyInfo;
-        if(pProperty != null)
-            return pProperty.PropertyType;
-
-        return null;
-    }
-
-    static public bool CheckValueIsNull(this MemberInfo pMemberInfo, object pTarget)
-    {
-        FieldInfo pFieldInfo = pMemberInfo as FieldInfo;
-        if (pFieldInfo == null)
-            return true;
-
-        object pObjectValue = pFieldInfo.GetValue(pTarget);
-        if(pObjectValue == null)
-            return true;
-
-        bool bResult;
-        UnityEngine.Object pUnityObject = pObjectValue as UnityEngine.Object;
-        if (pObjectValue is UnityEngine.Object)
-            bResult = pUnityObject.Equals(null);
-        else
-            bResult = pObjectValue.Equals(null);
-        return bResult;
-    }
-
-    static public void SetValue_Extension(this MemberInfo pMemberInfo, object pTarget, object pValue)
-    {
-        FieldInfo pFieldInfo = pMemberInfo as FieldInfo;
-        if (pFieldInfo != null)
-            pFieldInfo.SetValue(pTarget, pValue);
-
-        PropertyInfo pProperty = pMemberInfo as PropertyInfo;
-        if (pProperty != null)
-            pProperty.SetValue(pTarget, pValue, null);
-    }
-
-    static public object GetValue_Extension(this MemberInfo pMemberInfo, object pTarget)
-    {
-        FieldInfo pFieldInfo = pMemberInfo as FieldInfo;
-        if (pFieldInfo != null)
-            return pFieldInfo.GetValue(pTarget);
-
-        PropertyInfo pProperty = pMemberInfo as PropertyInfo;
-        if (pProperty != null)
-            return pProperty.GetValue(pTarget);
-
-        return null;
-    }
-}
-
 public interface IGetComponentAttribute
 {
     object GetComponent(MonoBehaviour pTargetMono, Type pElementType);
@@ -454,5 +395,64 @@ static public class SCManagerGetComponent
         for (int i = 0; i < arrObject.Length; i++)
             arrObjectReturn[i] = (arrObject[i] as Transform).gameObject;
         return arrObjectReturn;
+    }
+}
+
+static public class Extension_MemberInfo
+{
+    static public System.Type MemberType(this MemberInfo pMemberInfo)
+    {
+        FieldInfo pFieldInfo = pMemberInfo as FieldInfo;
+        if (pFieldInfo != null)
+            return pFieldInfo.FieldType;
+
+        PropertyInfo pProperty = pMemberInfo as PropertyInfo;
+        if (pProperty != null)
+            return pProperty.PropertyType;
+
+        return null;
+    }
+
+    static public bool CheckValueIsNull(this MemberInfo pMemberInfo, object pTarget)
+    {
+        FieldInfo pFieldInfo = pMemberInfo as FieldInfo;
+        if (pFieldInfo == null)
+            return true;
+
+        object pObjectValue = pFieldInfo.GetValue(pTarget);
+        if (pObjectValue == null)
+            return true;
+
+        bool bResult;
+        UnityEngine.Object pUnityObject = pObjectValue as UnityEngine.Object;
+        if (pObjectValue is UnityEngine.Object)
+            bResult = pUnityObject.Equals(null);
+        else
+            bResult = pObjectValue.Equals(null);
+        return bResult;
+    }
+
+    static public void SetValue_Extension(this MemberInfo pMemberInfo, object pTarget, object pValue)
+    {
+        FieldInfo pFieldInfo = pMemberInfo as FieldInfo;
+        if (pFieldInfo != null)
+            pFieldInfo.SetValue(pTarget, pValue);
+
+        PropertyInfo pProperty = pMemberInfo as PropertyInfo;
+        if (pProperty != null)
+            pProperty.SetValue(pTarget, pValue, null);
+    }
+
+    static public object GetValue_Extension(this MemberInfo pMemberInfo, object pTarget)
+    {
+        FieldInfo pFieldInfo = pMemberInfo as FieldInfo;
+        if (pFieldInfo != null)
+            return pFieldInfo.GetValue(pTarget);
+
+        PropertyInfo pProperty = pMemberInfo as PropertyInfo;
+        if (pProperty != null)
+            return pProperty.GetValue(pTarget);
+
+        return null;
     }
 }

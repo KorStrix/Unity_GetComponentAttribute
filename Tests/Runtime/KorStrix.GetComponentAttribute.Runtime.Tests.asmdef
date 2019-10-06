@@ -1,7 +1,7 @@
 {
-    "name": "Tests",
+    "name": "KorStrix.GetComponentAttribute.Runtime.Tests",
     "references": [
-        "StrixLibrary"
+        "KorStrix.GetComponentAttribute.Runtime"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"
@@ -12,5 +12,6 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": []
 }

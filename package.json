@@ -1,0 +1,17 @@
+{
+  "name": "com.korstrix.getcomponentattribute",
+  "version": "1.0.0",
+  "displayName": "GetComponent Attribute",
+  "description": "GetComponent\ub97c Attribute\ub85c \ub3d9\uc791\ud569\ub2c8\ub2e4.",
+  "unity": "2017.1",
+  "keywords": [
+    "utility",
+    "getcomponent",
+    "attribute"
+  ],
+  "author": {
+    "name": "KorStrix",
+    "email": "korstrix@gmail.com",
+    "url": "https://discord.gg/9EGrJap"
+  }
+}
