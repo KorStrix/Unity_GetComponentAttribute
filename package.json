@@ -1,5 +1,5 @@
 {
-	"name" : "com.KorStrix.GetComponentAttribute",
+	"name" : "com.korstrix.getcomponentattribute",
 	"version": "1.0.0",
 	"displayName" :"GetComponent Attribute",
 	"description" :"GetComponent를 Attribute로 동작합니다.",
