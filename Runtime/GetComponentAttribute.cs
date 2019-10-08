@@ -42,7 +42,7 @@ public class GetComponentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pTargetMono, Type pElementType)
     {
-        return SCManagerGetComponent.Event_GetComponent(pTargetMono, pElementType);
+        return SCGetComponentAttributeHelper.Event_GetComponent(pTargetMono, pElementType);
     }
 }
 
@@ -88,7 +88,7 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase
 
     public override object GetComponent(MonoBehaviour pTargetMono, Type pElementType)
     {
-        return SCManagerGetComponent.Event_GetComponentInChildren(pTargetMono, pElementType, bInclude_DeActive, bSearch_By_ComponentName, strComponentName);
+        return SCGetComponentAttributeHelper.Event_GetComponentInChildren(pTargetMono, pElementType, bInclude_DeActive, bSearch_By_ComponentName, strComponentName);
     }
 }
 
@@ -96,12 +96,12 @@ public class GetComponentInParentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pTargetMono, Type pElementType)
     {
-        return SCManagerGetComponent.Event_GetComponentInParents(pTargetMono, pElementType);
+        return SCGetComponentAttributeHelper.Event_GetComponentInParents(pTargetMono, pElementType);
     }
 }
 
 
-static public class SCManagerGetComponent
+static public class SCGetComponentAttributeHelper
 {
     static public UnityEngine.Object GetComponentInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_DeActive)
     {
@@ -143,12 +143,12 @@ static public class SCManagerGetComponent
         return listReturn;
     }
 
-    static public void DoUpdateGetComponentAttribute(MonoBehaviour pTarget)
+    static public void DoUpdate_GetComponentAttribute(MonoBehaviour pTarget)
     {
-        DoUpdateGetComponentAttribute(pTarget, pTarget);
+        DoUpdate_GetComponentAttribute(pTarget, pTarget);
     }
 
-    static public void DoUpdateGetComponentAttribute(MonoBehaviour pMonobehaviourOwner, object pClass_Anything)
+    static public void DoUpdate_GetComponentAttribute(MonoBehaviour pMonobehaviourOwner, object pClass_Anything)
     {
         // BindingFloags를 일일이 써야 잘 동작한다..
         System.Type pType = pClass_Anything.GetType();
@@ -162,10 +162,10 @@ static public class SCManagerGetComponent
     static private void UpdateComponentAttribute(MonoBehaviour pTargetMono, object pFieldOwner, MemberInfo[] arrMember)
     {
         for (int i = 0; i < arrMember.Length; i++)
-            DoUpdateGetComponentAttribute(pTargetMono, pFieldOwner, arrMember[i]);
+            DoUpdate_GetComponentAttribute(pTargetMono, pFieldOwner, arrMember[i]);
     }
 
-    static public void DoUpdateGetComponentAttribute(MonoBehaviour pTargetMono, object pMemberOwner, MemberInfo pMemberInfo)
+    static public void DoUpdate_GetComponentAttribute(MonoBehaviour pTargetMono, object pMemberOwner, MemberInfo pMemberInfo)
     {
         object[] arrCustomAttributes = pMemberInfo.GetCustomAttributes(true);
         for (int i = 0; i < arrCustomAttributes.Length; i++)

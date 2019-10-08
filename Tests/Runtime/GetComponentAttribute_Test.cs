@@ -62,7 +62,7 @@ namespace StrixLibrary_Test
 
         public void Awake()
         {
-            SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
+            SCGetComponentAttributeHelper.DoUpdate_GetComponentAttribute(this);
         }
 
         [Test]
