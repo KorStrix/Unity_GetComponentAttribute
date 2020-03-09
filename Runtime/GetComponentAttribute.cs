@@ -49,18 +49,18 @@ public class GetComponentAttribute : GetComponentAttributeBase
 public class GetComponentInChildrenAttribute : GetComponentAttributeBase
 {
     public bool bSearch_By_ComponentName = false;
-    public bool bInclude_DeActive = false;
+    public bool bInclude_OnDisable = false;
     public string strComponentName;
 
-    public GetComponentInChildrenAttribute(bool bInclude_DeActive = true)
+    public GetComponentInChildrenAttribute(bool bInclude_OnDisable = true)
     {
         bSearch_By_ComponentName = false;
-        this.bInclude_DeActive = bInclude_DeActive;
+        this.bInclude_OnDisable = bInclude_OnDisable;
     }
 
-    public GetComponentInChildrenAttribute(bool bInclude_DeActive, bool bIsPrint_OnNotFound = true)
+    public GetComponentInChildrenAttribute(bool bInclude_OnDisable, bool bIsPrint_OnNotFound = true)
     {
-        this.bInclude_DeActive = bInclude_DeActive;
+        this.bInclude_OnDisable = bInclude_OnDisable;
         this.bSearch_By_ComponentName = false;
         this.bIsPrint_OnNotFound = bIsPrint_OnNotFound;
     }
@@ -71,16 +71,16 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase
         this.bSearch_By_ComponentName = true;
     }
 
-    public GetComponentInChildrenAttribute(System.Object pComponentName, bool bInclude_DeActive)
+    public GetComponentInChildrenAttribute(System.Object pComponentName, bool bInclude_OnDisable)
     {
         this.strComponentName = pComponentName.ToString();
         this.bSearch_By_ComponentName = true;
-        this.bInclude_DeActive = bInclude_DeActive;
+        this.bInclude_OnDisable = bInclude_OnDisable;
     }
 
-    public GetComponentInChildrenAttribute(System.Object pComponentName, bool bInclude_DeActive, bool bIsPrint_OnNotFound = true)
+    public GetComponentInChildrenAttribute(System.Object pComponentName, bool bInclude_OnDisable, bool bIsPrint_OnNotFound = true)
     {
-        this.bInclude_DeActive = bInclude_DeActive;
+        this.bInclude_OnDisable = bInclude_OnDisable;
         this.strComponentName = pComponentName.ToString();
         this.bSearch_By_ComponentName = true;
         this.bIsPrint_OnNotFound = bIsPrint_OnNotFound;
@@ -88,7 +88,7 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase
 
     public override object GetComponent(MonoBehaviour pTargetMono, Type pElementType)
     {
-        return SCGetComponentAttributeHelper.Event_GetComponentInChildren(pTargetMono, pElementType, bInclude_DeActive, bSearch_By_ComponentName, strComponentName);
+        return SCGetComponentAttributeHelper.Event_GetComponentInChildren(pTargetMono, pElementType, bInclude_OnDisable, bSearch_By_ComponentName, strComponentName);
     }
 }
 
@@ -103,27 +103,27 @@ public class GetComponentInParentAttribute : GetComponentAttributeBase
 
 static public class SCGetComponentAttributeHelper
 {
-    static public UnityEngine.Object GetComponentInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_DeActive)
+    static public UnityEngine.Object GetComponentInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
     {
-        List<UnityEngine.Object> listComponent = GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_DeActive);
+        List<UnityEngine.Object> listComponent = GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_OnDisable);
         if (listComponent.Count > 0)
             return listComponent[0];
         else
             return null;
     }
 
-    static public UnityEngine.Object[] GetComponentsInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_DeActive)
+    static public UnityEngine.Object[] GetComponentsInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
     {
-        return GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_DeActive).ToArray();
+        return GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_OnDisable).ToArray();
     }
 
-    static public List<UnityEngine.Object> GetComponentsInChildrenList_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_DeActive)
+    static public List<UnityEngine.Object> GetComponentsInChildrenList_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
     {
         Component[] arrComponentFind = null;
         if (pComponentType == typeof(GameObject))
             arrComponentFind = pTarget.transform.GetComponentsInChildren(typeof(Transform), true);
         else
-            arrComponentFind = pTarget.transform.GetComponentsInChildren(pComponentType, bInclude_DeActive);
+            arrComponentFind = pTarget.transform.GetComponentsInChildren(pComponentType, bInclude_OnDisable);
 
         return ExtractSameNameList(strObjectName, arrComponentFind);
     }
@@ -355,7 +355,7 @@ static public class SCGetComponentAttributeHelper
                 try
                 {
                     UnityEngine.Object pComponentChild = arrComponent.GetValue(i) as UnityEngine.Object;
-                    var pEnum = System.Enum.Parse(pType_DictionaryKey, pComponentChild.name, true);
+                    var pEnum = System.Enum.Parse(pType_DictionaryKey, pComponentChild.name);
                     Method_Add.Invoke(pInstanceDictionary, new object[] {
                                     pEnum,
                                     pComponentChild });

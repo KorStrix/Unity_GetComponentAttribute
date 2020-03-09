@@ -1,5 +1,3 @@
-#if UNIT_TEST
-
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -187,5 +185,3 @@ namespace StrixLibrary_Test
     }
 
 }
-
-#endif
