@@ -315,9 +315,8 @@ static public class SCGetComponentAttributeHelper
         var Method_Add = pTypeField.GetMethod("Add", new[] {
                                 pType_DictionaryKey, pType_DictionaryValue });
 
-        var pInstanceDictionary = System.Activator.CreateInstance(pTypeField);
-        bool bIsDrived_DictionaryItem = CheckIsDERIVED_DictionaryItem(pType_DictionaryValue.GetInterfaces());
 
+        var pInstanceDictionary = System.Activator.CreateInstance(pTypeField);
         if (pType_DictionaryKey == typeof(string))
         {
             for (int i = 0; i < arrComponent.Length; i++)
@@ -335,26 +334,19 @@ static public class SCGetComponentAttributeHelper
                     Debug.LogError(pComponentChild.name + " Get Compeont - Dictionary Add - Overlap Key MonoType : " + pTargetMono.GetType() + "/Member : " + pMember.Name, pTargetMono);
                 }
             }
-
-        }
-        else if (bIsDrived_DictionaryItem)
-        {
-            var pMethod_GetKey = pType_DictionaryValue.GetMethod("IDictionaryItem_GetKey");
-            for (int i = 0; i < arrComponent.Length; i++)
-            {
-                UnityEngine.Object pComponentChild = arrComponent.GetValue(i) as UnityEngine.Object;
-                Method_Add.Invoke(pInstanceDictionary, new object[] {
-                                    pMethod_GetKey.Invoke(pComponentChild, null),
-                                    pComponentChild });
-            }
         }
         else if (pType_DictionaryKey.IsEnum)
         {
+            HashSet<string> setEnumValues = new HashSet<string>(System.Enum.GetValues(pType_DictionaryKey));
+
             for (int i = 0; i < arrComponent.Length; i++)
             {
                 try
                 {
                     UnityEngine.Object pComponentChild = arrComponent.GetValue(i) as UnityEngine.Object;
+                    if (setEnumValues.Contains(pComponentChild.name) == false)
+                        continue;
+
                     var pEnum = System.Enum.Parse(pType_DictionaryKey, pComponentChild.name);
                     Method_Add.Invoke(pInstanceDictionary, new object[] {
                                     pEnum,
@@ -366,26 +358,6 @@ static public class SCGetComponentAttributeHelper
 
         pMember.SetValue_Extension(pMemberOwner, pInstanceDictionary);
         return pComponent;
-    }
-
-    static private bool CheckIsDERIVED_DictionaryItem(Type[] arrInterfaces)
-    {
-#if STRIX_LIBRARY
-        string strTypeName = typeof(IDictionaryItem<>).Name;
-        bool bIsDerived_DictionaryItem = false;
-        for (int i = 0; i < arrInterfaces.Length; i++)
-        {
-            if (arrInterfaces[i].Name.Equals(strTypeName))
-            {
-                bIsDerived_DictionaryItem = true;
-                break;
-            }
-        }
-
-        return bIsDerived_DictionaryItem;
-#else
-        return false;
-#endif
     }
 
     static private GameObject[] Convert_TransformArray_To_GameObjectArray(MonoBehaviour pTargetMono, object pObject)
