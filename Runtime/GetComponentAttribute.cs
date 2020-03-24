@@ -22,6 +22,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 
 public interface IGetComponentAttribute
 {
@@ -30,7 +31,7 @@ public interface IGetComponentAttribute
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
-public abstract class GetComponentAttributeBase : UnityEngine.PropertyAttribute, IGetComponentAttribute
+public abstract class GetComponentAttributeBase : PropertyAttribute, IGetComponentAttribute
 {
     public bool bIsPrint_OnNotFound_GetComponent => bIsPrint_OnNotFound;
     public bool bIsPrint_OnNotFound;
@@ -103,31 +104,6 @@ public class GetComponentInParentAttribute : GetComponentAttributeBase
 
 static public class SCGetComponentAttributeHelper
 {
-    static public UnityEngine.Object GetComponentInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
-    {
-        List<UnityEngine.Object> listComponent = GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_OnDisable);
-        if (listComponent.Count > 0)
-            return listComponent[0];
-        else
-            return null;
-    }
-
-    static public UnityEngine.Object[] GetComponentsInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
-    {
-        return GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_OnDisable).ToArray();
-    }
-
-    static public List<UnityEngine.Object> GetComponentsInChildrenList_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
-    {
-        Component[] arrComponentFind = null;
-        if (pComponentType == typeof(GameObject))
-            arrComponentFind = pTarget.transform.GetComponentsInChildren(typeof(Transform), true);
-        else
-            arrComponentFind = pTarget.transform.GetComponentsInChildren(pComponentType, bInclude_OnDisable);
-
-        return ExtractSameNameList(strObjectName, arrComponentFind);
-    }
-
     static public List<UnityEngine.Object> ExtractSameNameList(string strObjectName, UnityEngine.Object[] arrComponentFind)
     {
         List<UnityEngine.Object> listReturn = new List<UnityEngine.Object>();
@@ -152,17 +128,14 @@ static public class SCGetComponentAttributeHelper
     {
         // BindingFloags를 일일이 써야 잘 동작한다..
         System.Type pType = pClass_Anything.GetType();
-        MemberInfo[] arrMembers = pType.GetMembers(BindingFlags.Public | BindingFlags.Instance);
-        UpdateComponentAttribute(pMonobehaviourOwner, pClass_Anything, arrMembers);
+        List<MemberInfo> listMembers = new List<MemberInfo>(pType.GetFields(BindingFlags.Public | BindingFlags.Instance));
+        listMembers.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
+        listMembers.AddRange(pType.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+        listMembers.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance));
 
-        arrMembers = pType.GetMembers(BindingFlags.NonPublic | BindingFlags.Instance);
-        UpdateComponentAttribute(pMonobehaviourOwner, pClass_Anything, arrMembers);
-    }
-
-    static private void UpdateComponentAttribute(MonoBehaviour pTargetMono, object pFieldOwner, MemberInfo[] arrMember)
-    {
-        for (int i = 0; i < arrMember.Length; i++)
-            DoUpdate_GetComponentAttribute(pTargetMono, pFieldOwner, arrMember[i]);
+        var arrMembers_Filtered = listMembers.Where(p => p.GetCustomAttributes().Count() > 0);
+        foreach(var pMember in arrMembers_Filtered)
+            DoUpdate_GetComponentAttribute(pMonobehaviourOwner, pClass_Anything, pMember);
     }
 
     static public void DoUpdate_GetComponentAttribute(MonoBehaviour pTargetMono, object pMemberOwner, MemberInfo pMemberInfo)
@@ -175,8 +148,8 @@ static public class SCGetComponentAttributeHelper
                 continue;
 
             System.Type pTypeMember = pMemberInfo.MemberType();
+            
             object pComponent = null;
-
             if (pTypeMember.IsGenericType)
                 pComponent = SetMember_OnGeneric(pGetcomponentAttribute, pTargetMono, pMemberOwner, pMemberInfo, pTypeMember);
             else if (pTypeMember.HasElementType)
@@ -261,6 +234,7 @@ static public class SCGetComponentAttributeHelper
 
         if (pElementType == typeof(GameObject))
         {
+            // GameObject는 Component가 아니므로, 모든 GameObject가 가지고 있는 Transform을 찾은 뒤 그것을 GameObject로 변환
             getter = typeof(MonoBehaviour)
             .GetMethod("GetComponentsInParent", new Type[] { })
             .MakeGenericMethod(typeof(Transform));
@@ -315,7 +289,6 @@ static public class SCGetComponentAttributeHelper
         var Method_Add = pTypeField.GetMethod("Add", new[] {
                                 pType_DictionaryKey, pType_DictionaryValue });
 
-
         var pInstanceDictionary = System.Activator.CreateInstance(pTypeField);
         if (pType_DictionaryKey == typeof(string))
         {
@@ -337,17 +310,16 @@ static public class SCGetComponentAttributeHelper
         }
         else if (pType_DictionaryKey.IsEnum)
         {
-            HashSet<string> setEnumValues = new HashSet<string>(System.Enum.GetValues(pType_DictionaryKey));
-
+            HashSet<string> setEnumName = new HashSet<string>(System.Enum.GetNames(pType_DictionaryKey));
             for (int i = 0; i < arrComponent.Length; i++)
-            {
+            { 
                 try
                 {
                     UnityEngine.Object pComponentChild = arrComponent.GetValue(i) as UnityEngine.Object;
-                    if (setEnumValues.Contains(pComponentChild.name) == false)
+                    if (setEnumName.Contains(pComponentChild.name) == false)
                         continue;
 
-                    var pEnum = System.Enum.Parse(pType_DictionaryKey, pComponentChild.name);
+                    var pEnum = System.Enum.Parse(pType_DictionaryKey, pComponentChild.name, true);
                     Method_Add.Invoke(pInstanceDictionary, new object[] {
                                     pEnum,
                                     pComponentChild });
@@ -370,7 +342,54 @@ static public class SCGetComponentAttributeHelper
     }
 }
 
-static public class Extension_MemberInfo
+
+
+#region ExtensionMethod
+
+static public class Component_Extension
+{
+    static public UnityEngine.Object GetComponentInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
+    {
+        List<UnityEngine.Object> listComponent = GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_OnDisable);
+        if (listComponent.Count > 0)
+            return listComponent[0];
+        else
+            return null;
+    }
+
+    static public UnityEngine.Object[] GetComponentsInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
+    {
+        return GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_OnDisable).ToArray();
+    }
+
+    static public List<UnityEngine.Object> GetComponentsInChildrenList_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
+    {
+        Component[] arrComponentFind = null;
+        if (pComponentType == typeof(GameObject))
+            arrComponentFind = pTarget.transform.GetComponentsInChildren(typeof(Transform), true);
+        else
+            arrComponentFind = pTarget.transform.GetComponentsInChildren(pComponentType, bInclude_OnDisable);
+
+        return ExtractSameNameList(strObjectName, arrComponentFind);
+    }
+
+    static public List<UnityEngine.Object> ExtractSameNameList(string strObjectName, UnityEngine.Object[] arrComponentFind)
+    {
+        List<UnityEngine.Object> listReturn = new List<UnityEngine.Object>();
+        if (arrComponentFind != null)
+        {
+            for (int i = 0; i < arrComponentFind.Length; i++)
+            {
+                if (arrComponentFind[i].name.Equals(strObjectName))
+                    listReturn.Add(arrComponentFind[i]);
+            }
+        }
+
+        return listReturn;
+    }
+}
+
+static public class MemberInfo_Extension
 {
     static public System.Type MemberType(this MemberInfo pMemberInfo)
     {
@@ -398,9 +417,9 @@ static public class Extension_MemberInfo
         bool bResult;
         UnityEngine.Object pUnityObject = pObjectValue as UnityEngine.Object;
         if (pObjectValue is UnityEngine.Object)
-            bResult = pUnityObject.Equals(null);
+            bResult = pUnityObject == null;
         else
-            bResult = pObjectValue.Equals(null);
+            bResult = pObjectValue == null;
         return bResult;
     }
 
@@ -428,3 +447,5 @@ static public class Extension_MemberInfo
         return null;
     }
 }
+
+#endregion

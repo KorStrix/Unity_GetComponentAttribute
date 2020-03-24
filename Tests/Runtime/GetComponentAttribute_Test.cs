@@ -4,11 +4,13 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace StrixLibrary_Test
+namespace GetComponentAttribute_Test
 {
 
     public class Test_ComponentParents : MonoBehaviour { }
     public class Test_ComponentChild : MonoBehaviour { }
+    public class Test_ComponentChild_SameName : MonoBehaviour { }
+
     public class Test_ComponentOnly : MonoBehaviour { }
 
     [Category("StrixLibrary")]
@@ -57,6 +59,9 @@ namespace StrixLibrary_Test
 
         [GetComponentInChildren]
         GameObject[] arrObject_Children = null;
+
+        [GetComponentInChildren("Test")]
+        public List<Test_ComponentChild_SameName> listChildren_NameIs_Test { get; private set; }
 
         public void Awake()
         {
@@ -122,40 +127,10 @@ namespace StrixLibrary_Test
                 Assert.IsTrue(pIterEnum.Current.Key.ToString() == pIterEnum.Current.Value.name.ToString());
         }
 
-#if STRIX_LIBRARY
-        public class Test_ComponentChild_DerivedDictionaryItem : MonoBehaviour, IDictionaryItem<GetComponentAttribute_Test.ETestChildObject>
-        {
-            public GetComponentAttribute_Test.ETestChildObject IDictionaryItem_GetKey()
-            {
-                return name.ConvertEnum<GetComponentAttribute_Test.ETestChildObject>();
-            }
-        }
-
         [Test]
-        static public void GetComponent_Child_Enum_Test()
+        static public void 겟컴포넌트인칠드런은_이름을통해_찾습니다()
         {
-            GameObject pObjectParents = new GameObject(nameof(GetComponent_Child_Enum_Test));
-
-            // GetComponent 대상인 자식 추가
-            for (int i = 0; i < (int)ETestChildObject.MAX; i++)
-            {
-                GameObject pObjectChild = new GameObject(((ETestChildObject)i).ToString());
-                pObjectChild.transform.SetParent(pObjectParents.transform);
-                pObjectChild.AddComponent<Test_ComponentChild_DerivedDictionaryItem>();
-            }
-
-            GetComponentAttribute_Test pParents = pObjectParents.AddComponent<GetComponentAttribute_Test>();
-
-            var pIterEnum = pParents.p_mapTest_KeyIsEnum.GetEnumerator();
-            while (pIterEnum.MoveNext())
-                Assert.IsTrue(pIterEnum.Current.Key.ToString() == pIterEnum.Current.Value.name.ToString());
-        }
-#endif
-
-        [Test]
-        static public void GetComponentChildren_Property_Test()
-        {
-            GameObject pObjectParents = new GameObject(nameof(GetComponentChildren_Property_Test));
+            GameObject pObjectParents = new GameObject(nameof(겟컴포넌트인칠드런은_이름을통해_찾습니다));
 
             // GetComponent 대상인 자식 추가
             for (int i = 0; i < (int)ETestChildObject.MAX; i++)
@@ -170,9 +145,9 @@ namespace StrixLibrary_Test
         }
 
         [Test]
-        static public void GetComponent_Array_Test()
+        static public void 겟컴포넌트는_컬렉션에담을수있습니다()
         {
-            GameObject pObjectParents = new GameObject(nameof(GetComponent_Array_Test));
+            GameObject pObjectParents = new GameObject(nameof(겟컴포넌트는_컬렉션에담을수있습니다));
 
             // GetComponent 대상인 자식 추가
             int iAddComponentCount = 3;
@@ -181,6 +156,29 @@ namespace StrixLibrary_Test
 
             GetComponentAttribute_Test pParents = pObjectParents.AddComponent<GetComponentAttribute_Test>();
             Assert.AreEqual(pParents.arrComponent.Length, iAddComponentCount);
+        }
+
+        [Test]
+        static public void 겟컴포넌트칠드런은_같은이름과_같은타입이면_컬렉션에담을수있습니다()
+        {
+            // Arrange
+            GameObject pObjectParents = new GameObject(nameof(겟컴포넌트칠드런은_같은이름과_같은타입이면_컬렉션에담을수있습니다));
+            int iAddComponentCount = 3;
+            for (int i = 0; i < iAddComponentCount; i++)
+            {
+                GameObject pObjectChild = new GameObject("Test");
+                pObjectChild.transform.SetParent(pObjectParents.transform);
+                pObjectChild.AddComponent<Test_ComponentChild_SameName>();
+            }
+
+
+            // Act
+            GetComponentAttribute_Test pParents = pObjectParents.AddComponent<GetComponentAttribute_Test>();
+
+
+
+            // Assert
+            Assert.AreEqual(pParents.listChildren_NameIs_Test.Count, iAddComponentCount);
         }
     }
 
