@@ -68,6 +68,7 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase
 
     public GetComponentInChildrenAttribute(System.Object pComponentName)
     {
+        this.bInclude_OnDisable = true;
         this.strComponentName = pComponentName.ToString();
         this.bSearch_By_ComponentName = true;
     }
