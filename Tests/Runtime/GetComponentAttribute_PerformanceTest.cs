@@ -56,7 +56,7 @@ namespace GetComponentAttribute_Test
         }
 
         [Test]
-        static public void GetComponentChildren_Field_Test()
+        public static void GetComponentChildren_Field_Test()
         {
             GameObject pObjectParents = new GameObject(nameof(GetComponentChildren_Field_Test));
 

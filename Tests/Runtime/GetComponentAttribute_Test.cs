@@ -69,7 +69,7 @@ namespace GetComponentAttribute_Test
         }
 
         [Test]
-        static public void GetComponentIn_Parent()
+        public static void GetComponentIn_Parent()
         {
             GameObject pObjectRoot = new GameObject("Root");
             pObjectRoot.AddComponent<Test_ComponentParents>();
@@ -82,7 +82,7 @@ namespace GetComponentAttribute_Test
         }
 
         [Test]
-        static public void GetComponentChildren_Field_Test()
+        public static void GetComponentChildren_Field_Test()
         {
             GameObject pObjectParents = new GameObject(nameof(GetComponentChildren_Field_Test));
 
@@ -128,7 +128,7 @@ namespace GetComponentAttribute_Test
         }
 
         [Test]
-        static public void 겟컴포넌트인칠드런은_이름을통해_찾습니다()
+        public static void 겟컴포넌트인칠드런은_이름을통해_찾습니다()
         {
             GameObject pObjectParents = new GameObject(nameof(겟컴포넌트인칠드런은_이름을통해_찾습니다));
 
@@ -145,7 +145,7 @@ namespace GetComponentAttribute_Test
         }
 
         [Test]
-        static public void 겟컴포넌트는_컬렉션에담을수있습니다()
+        public static void 겟컴포넌트는_컬렉션에담을수있습니다()
         {
             GameObject pObjectParents = new GameObject(nameof(겟컴포넌트는_컬렉션에담을수있습니다));
 
@@ -159,7 +159,7 @@ namespace GetComponentAttribute_Test
         }
 
         [Test]
-        static public void 겟컴포넌트칠드런은_같은이름과_같은타입이면_컬렉션에담을수있습니다()
+        public static void 겟컴포넌트칠드런은_같은이름과_같은타입이면_컬렉션에담을수있습니다()
         {
             // Arrange
             GameObject pObjectParents = new GameObject(nameof(겟컴포넌트칠드런은_같은이름과_같은타입이면_컬렉션에담을수있습니다));
