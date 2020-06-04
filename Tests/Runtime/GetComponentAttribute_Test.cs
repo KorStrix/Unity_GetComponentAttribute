@@ -29,36 +29,36 @@ namespace GetComponentAttribute_Test
         }
 
 
-        [GetComponentInParent]
-        public Test_ComponentParents p_pParents = null;
+        [GetComponentInParent] public Test_ComponentParents p_pParents = null;
+
+        [GetComponentInChildren] public List<Test_ComponentChild> p_listTest = new List<Test_ComponentChild>();
 
         [GetComponentInChildren]
-        public List<Test_ComponentChild> p_listTest = new List<Test_ComponentChild>();
+        public Dictionary<string, Test_ComponentChild> p_mapTest_KeyIsString =
+            new Dictionary<string, Test_ComponentChild>();
 
         [GetComponentInChildren]
-        public Dictionary<string, Test_ComponentChild> p_mapTest_KeyIsString = new Dictionary<string, Test_ComponentChild>();
-        [GetComponentInChildren]
-        private Dictionary<ETestChildObject, Test_ComponentChild> p_mapTest_KeyIsEnum = new Dictionary<ETestChildObject, Test_ComponentChild>();
+        private Dictionary<ETestChildObject, Test_ComponentChild> p_mapTest_KeyIsEnum =
+            new Dictionary<ETestChildObject, Test_ComponentChild>();
 
         [GetComponentInChildren(nameof(ETestChildObject.TestObject_Other_FindString))]
         private Test_ComponentChild p_pChildComponent_FindString = null;
+
         [GetComponentInChildren(ETestChildObject.TestObject_Other_FindEnum)]
         private Test_ComponentChild p_pChildComponent_FindEnum = null;
 
         [GetComponentInChildren(nameof(ETestChildObject.TestObject_Other_FindString))]
         private GameObject p_pObject_FindString = null;
+
         [GetComponentInChildren(ETestChildObject.TestObject_Other_FindEnum)]
         private GameObject p_pObject_FindEnum = null;
 
 
-        [GetComponentInChildren]
-        public Test_ComponentChild p_pChildComponent_FindEnumProperty { get; private set; }
+        [GetComponentInChildren] public Test_ComponentChild p_pChildComponent_FindEnumProperty { get; private set; }
 
-        [GetComponent]
-        Test_ComponentOnly[] arrComponent = null;
+        [GetComponent] Test_ComponentOnly[] arrComponent = null;
 
-        [GetComponentInChildren]
-        GameObject[] arrObject_Children = null;
+        [GetComponentInChildren] GameObject[] arrObject_Children = null;
 
         [GetComponentInChildren("Test")]
         public List<Test_ComponentChild_SameName> listChildren_NameIs_Test { get; private set; }
@@ -87,10 +87,10 @@ namespace GetComponentAttribute_Test
             GameObject pObjectParents = new GameObject(nameof(GetComponentChildren_Field_Test));
 
             // GetComponent 대상인 자식 추가
-            int iChildCount = (int)ETestChildObject.MAX;
+            int iChildCount = (int) ETestChildObject.MAX;
             for (int i = 0; i < iChildCount; i++)
             {
-                GameObject pObjectChild = new GameObject(((ETestChildObject)i).ToString());
+                GameObject pObjectChild = new GameObject(((ETestChildObject) i).ToString());
                 pObjectChild.transform.SetParent(pObjectParents.transform);
                 pObjectChild.AddComponent<Test_ComponentChild>();
             }
@@ -106,17 +106,21 @@ namespace GetComponentAttribute_Test
             Assert.NotNull(pParents.p_pObject_FindString);
             Assert.NotNull(pParents.p_pObject_FindEnum);
 
-            Assert.AreEqual(pParents.p_pChildComponent_FindString.name, ETestChildObject.TestObject_Other_FindString.ToString());
-            Assert.AreEqual(pParents.p_pChildComponent_FindEnum.name, ETestChildObject.TestObject_Other_FindEnum.ToString());
+            Assert.AreEqual(pParents.p_pChildComponent_FindString.name,
+                ETestChildObject.TestObject_Other_FindString.ToString());
+            Assert.AreEqual(pParents.p_pChildComponent_FindEnum.name,
+                ETestChildObject.TestObject_Other_FindEnum.ToString());
 
-            Assert.AreEqual(pParents.p_pObject_FindString.name, ETestChildObject.TestObject_Other_FindString.ToString());
+            Assert.AreEqual(pParents.p_pObject_FindString.name,
+                ETestChildObject.TestObject_Other_FindString.ToString());
             Assert.AreEqual(pParents.p_pObject_FindEnum.name, ETestChildObject.TestObject_Other_FindEnum.ToString());
 
             Assert.AreEqual(pParents.p_listTest.Count, iChildCount);
 
             Assert.AreEqual(pParents.p_mapTest_KeyIsEnum.Count, iChildCount);
             Assert.AreEqual(pParents.p_mapTest_KeyIsString.Count, iChildCount);
-            Assert.AreEqual(pParents.arrObject_Children.Length, pObjectParents.transform.childCount + 1); // 자기 자신까지 추가하기떄문에 마지막에 + 1을 한다.
+            Assert.AreEqual(pParents.arrObject_Children.Length,
+                pObjectParents.transform.childCount + 1); // 자기 자신까지 추가하기떄문에 마지막에 + 1을 한다.
 
             var pIterString = pParents.p_mapTest_KeyIsString.GetEnumerator();
             while (pIterString.MoveNext())
@@ -133,9 +137,9 @@ namespace GetComponentAttribute_Test
             GameObject pObjectParents = new GameObject(nameof(겟컴포넌트인칠드런은_이름을통해_찾습니다));
 
             // GetComponent 대상인 자식 추가
-            for (int i = 0; i < (int)ETestChildObject.MAX; i++)
+            for (int i = 0; i < (int) ETestChildObject.MAX; i++)
             {
-                GameObject pObjectChild = new GameObject(((ETestChildObject)i).ToString());
+                GameObject pObjectChild = new GameObject(((ETestChildObject) i).ToString());
                 pObjectChild.transform.SetParent(pObjectParents.transform);
                 pObjectChild.AddComponent<Test_ComponentChild>();
             }
@@ -179,6 +183,50 @@ namespace GetComponentAttribute_Test
 
             // Assert
             Assert.AreEqual(pParents.listChildren_NameIs_Test.Count, iAddComponentCount);
+        }
+
+        public class GetComponentTestTarget_1 : MonoBehaviour  {  }
+        public class GetComponentTestTarget_2 : MonoBehaviour { }
+
+        public class GetComponentTest_GrandParents : MonoBehaviour
+        {
+            [GetComponentInChildren] public GetComponentTestTarget_1[] arrTest_1 = null;
+        }
+
+        public class GetComponentTest_Parents : GetComponentTest_GrandParents
+        {
+            [GetComponentInChildren] public GetComponentTestTarget_2[] arrTest_2 { get; protected set; }
+        }
+
+        public class GetComponentTest_Child : GetComponentTest_Parents
+        {
+        }
+
+        [Test]
+        public static void 부모클래스의_겟컴포넌트애트리뷰트_테스트()
+        {
+            // Arrange (데이터 정렬)
+            GetComponentTest_Child pComponentTest = new GameObject(nameof(부모클래스의_겟컴포넌트애트리뷰트_테스트)).AddComponent<GetComponentTest_Child>();
+            Transform pTransformTest = pComponentTest.transform;
+
+            int iRandomCount_1 = Random.Range(3, 6);
+            for(int i = 0; i < iRandomCount_1; i++)
+                new GameObject(nameof(GetComponentTestTarget_1)).AddComponent<GetComponentTestTarget_1>().transform.SetParent(pTransformTest);
+
+            int iRandomCount_2 = Random.Range(3, 6);
+            for (int i = 0; i < iRandomCount_2; i++)
+                new GameObject(nameof(GetComponentTestTarget_2)).AddComponent<GetComponentTestTarget_2>().transform.SetParent(pTransformTest);
+
+
+
+            // Act (기능 실행)
+            SCGetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+
+
+
+            // Arrange (확인)
+            Assert.AreEqual(pComponentTest.arrTest_1.Length, iRandomCount_1);
+            Assert.AreEqual(pComponentTest.arrTest_2.Length, iRandomCount_2);
         }
     }
 
