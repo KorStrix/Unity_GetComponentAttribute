@@ -1,7 +1,7 @@
 #region Header
 /* ============================================ 
  *			    Strix Unity Library
- *		https://github.com/KorStrix/UnityLibrary
+ *		https://github.com/KorStrix/Unity_GetComponentAttribute
  *	============================================ 	
  *	작성자 : Strix
  *	
@@ -17,12 +17,12 @@
    ============================================ */
 #endregion Header
 
-using UnityEngine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
+using UnityEngine;
+using Object = System.Object;
 
 public interface IGetComponentAttribute
 {
@@ -30,7 +30,7 @@ public interface IGetComponentAttribute
     bool bIsPrint_OnNotFound_GetComponent { get; }
 }
 
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public abstract class GetComponentAttributeBase : PropertyAttribute, IGetComponentAttribute
 {
     public bool bIsPrint_OnNotFound_GetComponent => bIsPrint_OnNotFound;
@@ -43,14 +43,14 @@ public class GetComponentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pTargetMono, Type pElementType)
     {
-        return SCGetComponentAttributeHelper.Event_GetComponent(pTargetMono, pElementType);
+        return GetComponentAttributeHelper.Event_GetComponent(pTargetMono, pElementType);
     }
 }
 
 public class GetComponentInChildrenAttribute : GetComponentAttributeBase
 {
-    public bool bSearch_By_ComponentName = false;
-    public bool bInclude_OnDisable = false;
+    public bool bSearch_By_ComponentName;
+    public bool bInclude_OnDisable;
     public string strComponentName;
 
     public GetComponentInChildrenAttribute(bool bInclude_OnDisable = true)
@@ -62,35 +62,35 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase
     public GetComponentInChildrenAttribute(bool bInclude_OnDisable, bool bIsPrint_OnNotFound = true)
     {
         this.bInclude_OnDisable = bInclude_OnDisable;
-        this.bSearch_By_ComponentName = false;
+        bSearch_By_ComponentName = false;
         this.bIsPrint_OnNotFound = bIsPrint_OnNotFound;
     }
 
-    public GetComponentInChildrenAttribute(System.Object pComponentName)
+    public GetComponentInChildrenAttribute(Object pComponentName)
     {
-        this.bInclude_OnDisable = true;
-        this.strComponentName = pComponentName.ToString();
-        this.bSearch_By_ComponentName = true;
+        bInclude_OnDisable = true;
+        strComponentName = pComponentName.ToString();
+        bSearch_By_ComponentName = true;
     }
 
-    public GetComponentInChildrenAttribute(System.Object pComponentName, bool bInclude_OnDisable)
+    public GetComponentInChildrenAttribute(Object pComponentName, bool bInclude_OnDisable)
     {
-        this.strComponentName = pComponentName.ToString();
-        this.bSearch_By_ComponentName = true;
+        strComponentName = pComponentName.ToString();
+        bSearch_By_ComponentName = true;
         this.bInclude_OnDisable = bInclude_OnDisable;
     }
 
-    public GetComponentInChildrenAttribute(System.Object pComponentName, bool bInclude_OnDisable, bool bIsPrint_OnNotFound = true)
+    public GetComponentInChildrenAttribute(Object pComponentName, bool bInclude_OnDisable, bool bIsPrint_OnNotFound = true)
     {
         this.bInclude_OnDisable = bInclude_OnDisable;
-        this.strComponentName = pComponentName.ToString();
-        this.bSearch_By_ComponentName = true;
+        strComponentName = pComponentName.ToString();
+        bSearch_By_ComponentName = true;
         this.bIsPrint_OnNotFound = bIsPrint_OnNotFound;
     }
 
     public override object GetComponent(MonoBehaviour pTargetMono, Type pElementType)
     {
-        return SCGetComponentAttributeHelper.Event_GetComponentInChildren(pTargetMono, pElementType, bInclude_OnDisable, bSearch_By_ComponentName, strComponentName);
+        return GetComponentAttributeHelper.Event_GetComponentInChildren(pTargetMono, pElementType, bInclude_OnDisable, bSearch_By_ComponentName, strComponentName);
     }
 }
 
@@ -98,12 +98,12 @@ public class GetComponentInParentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pTargetMono, Type pElementType)
     {
-        return SCGetComponentAttributeHelper.Event_GetComponentInParents(pTargetMono, pElementType);
+        return GetComponentAttributeHelper.Event_GetComponentInParents(pTargetMono, pElementType);
     }
 }
 
 
-public static class SCGetComponentAttributeHelper
+public static class GetComponentAttributeHelper
 {
     public static List<UnityEngine.Object> ExtractSameNameList(string strObjectName, UnityEngine.Object[] arrComponentFind)
     {
@@ -127,14 +127,14 @@ public static class SCGetComponentAttributeHelper
 
     public static void DoUpdate_GetComponentAttribute(MonoBehaviour pMonobehaviourOwner, object pClass_Anything)
     {
-        // BindingFloags를 일일이 써야 잘 동작한다..
-        System.Type pType = pClass_Anything.GetType();
+        // BindingFlags를 일일이 써야 잘 동작한다..
+        Type pType = pClass_Anything.GetType();
         List<MemberInfo> listMembers = new List<MemberInfo>(pType.GetFields(BindingFlags.Public | BindingFlags.Instance));
         listMembers.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
         listMembers.AddRange(pType.GetProperties(BindingFlags.Public | BindingFlags.Instance));
         listMembers.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance));
 
-        var arrMembers_Filtered = listMembers.Where(p => p.GetCustomAttributes().Count() > 0);
+        var arrMembers_Filtered = listMembers.Where(p => p.GetCustomAttributes().Any());
         foreach(var pMember in arrMembers_Filtered)
             DoUpdate_GetComponentAttribute(pMonobehaviourOwner, pClass_Anything, pMember);
     }
@@ -144,29 +144,28 @@ public static class SCGetComponentAttributeHelper
         object[] arrCustomAttributes = pMemberInfo.GetCustomAttributes(true);
         for (int i = 0; i < arrCustomAttributes.Length; i++)
         {
-            IGetComponentAttribute pGetcomponentAttribute = arrCustomAttributes[i] as IGetComponentAttribute;
-            if (pGetcomponentAttribute == null)
+            IGetComponentAttribute pGetComponentAttribute = arrCustomAttributes[i] as IGetComponentAttribute;
+            if (pGetComponentAttribute == null)
                 continue;
 
-            System.Type pTypeMember = pMemberInfo.MemberType();
+            Type pTypeMember = pMemberInfo.MemberType();
             
             object pComponent = null;
             if (pTypeMember.IsGenericType)
-                pComponent = SetMember_OnGeneric(pGetcomponentAttribute, pTargetMono, pMemberOwner, pMemberInfo, pTypeMember);
+                pComponent = SetMember_OnGeneric(pGetComponentAttribute, pTargetMono, pMemberOwner, pMemberInfo, pTypeMember);
             else if (pTypeMember.HasElementType)
-                pComponent = pGetcomponentAttribute.GetComponent(pTargetMono, pTypeMember.GetElementType());
+                pComponent = pGetComponentAttribute.GetComponent(pTargetMono, pTypeMember.GetElementType());
             else
-                pComponent = pGetcomponentAttribute.GetComponent(pTargetMono, pTypeMember);
+                pComponent = pGetComponentAttribute.GetComponent(pTargetMono, pTypeMember);
 
             if (pComponent == null)
             {
-                if (pGetcomponentAttribute.bIsPrint_OnNotFound_GetComponent)
+                if (pGetComponentAttribute.bIsPrint_OnNotFound_GetComponent)
                 {
-                    GetComponentInChildrenAttribute pAttribute = pGetcomponentAttribute as GetComponentInChildrenAttribute;
-                    if (pAttribute != null && pAttribute.bSearch_By_ComponentName)
-                        Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}>({2}) Result == null", pGetcomponentAttribute.GetType().Name, pTypeMember, pAttribute.strComponentName), pTargetMono);
+                    if (pGetComponentAttribute is GetComponentInChildrenAttribute pAttribute && pAttribute.bSearch_By_ComponentName)
+                        Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}>({2}) Result == null", pGetComponentAttribute.GetType().Name, pTypeMember, pAttribute.strComponentName), pTargetMono);
                     else
-                        Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}> Result == null", pGetcomponentAttribute.GetType().Name, pTypeMember), pTargetMono);
+                        Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}> Result == null", pGetComponentAttribute.GetType().Name, pTypeMember), pTargetMono);
                 }
 
                 continue;
@@ -176,16 +175,31 @@ public static class SCGetComponentAttributeHelper
             {
                 if (pTypeMember.HasElementType == false)
                 {
-                    Array arrComponent = pComponent as Array;
-                    if (arrComponent != null && arrComponent.Length != 0)
+                    if (pComponent is Array arrComponent && arrComponent.Length != 0)
                         pMemberInfo.SetValue_Extension(pMemberOwner, arrComponent.GetValue(0));
                 }
                 else
                 {
-                    if (pTypeMember == typeof(GameObject))
-                        pMemberInfo.SetValue_Extension(pMemberOwner, ((Component)pComponent).gameObject);
+                    if (pComponent is Array arrComponent && arrComponent.Length != 0)
+                    {
+                        if (pTypeMember.GetElementType() == typeof(GameObject))
+                            pMemberInfo.SetValue_Extension(pMemberOwner, arrComponent.Cast<GameObject>().ToArray());
+                        else
+                        {
+                            // Object[]를 Type[]로 바꿔야함..;
+                            Array ConvertedArray = Array.CreateInstance(pTypeMember.GetElementType(), arrComponent.Length);
+                            Array.Copy(arrComponent, ConvertedArray, arrComponent.Length);
+
+                            pMemberInfo.SetValue_Extension(pMemberOwner, ConvertedArray);
+                        }
+                    }
                     else
-                        pMemberInfo.SetValue_Extension(pMemberOwner, pComponent);
+                    {
+                        if (pTypeMember == typeof(GameObject))
+                            pMemberInfo.SetValue_Extension(pMemberOwner, ((Component)pComponent).gameObject);
+                        else
+                            pMemberInfo.SetValue_Extension(pMemberOwner, pComponent);
+                    }
                 }
             }
         }
@@ -206,53 +220,48 @@ public static class SCGetComponentAttributeHelper
     {
         object pObjectReturn;
 
-        MethodInfo getter = typeof(MonoBehaviour)
-                    .GetMethod("GetComponentsInChildren", new Type[] { typeof(bool) })
-                    .MakeGenericMethod(pElementType);
+        if (pElementType.HasElementType)
+            pElementType = pElementType.GetElementType();
 
-        if (pElementType == typeof(GameObject))
-        {
-            getter = typeof(MonoBehaviour)
-            .GetMethod("GetComponentsInChildren", new Type[] { typeof(bool) })
-            .MakeGenericMethod(typeof(Transform));
+        bool bTypeIsGameObject = pElementType == typeof(GameObject);
+        if (bTypeIsGameObject)
+            pElementType = typeof(Transform);
 
-            pObjectReturn = Convert_TransformArray_To_GameObjectArray(pTargetMono, getter.Invoke(pTargetMono, new object[] { bInclude_DeActive }));
-        }
+        MethodInfo pGetMethod = typeof(MonoBehaviour).
+            GetMethod("GetComponentsInChildren", new[] { typeof(bool) }).
+            MakeGenericMethod(pElementType);
+
+        if (bTypeIsGameObject)
+            pObjectReturn = Convert_TransformArray_To_GameObjectArray(pTargetMono, pGetMethod.Invoke(pTargetMono, new object[] { bInclude_DeActive }));
         else
-            pObjectReturn = getter.Invoke(pTargetMono, new object[] { bInclude_DeActive });
+            pObjectReturn = pGetMethod.Invoke(pTargetMono, new object[] { bInclude_DeActive });
 
         if (bSearch_By_ComponentName)
             return ExtractSameNameList(strComponentName, pObjectReturn as UnityEngine.Object[]).ToArray();
-        else
-            return pObjectReturn;
+        return pObjectReturn;
     }
 
     public static object Event_GetComponentInParents(MonoBehaviour pTargetMono, Type pElementType)
     {
-        MethodInfo getter = typeof(MonoBehaviour)
-          .GetMethod("GetComponentsInParent", new Type[] { })
-          .MakeGenericMethod(pElementType);
+        bool bTypeIsGameObject = pElementType == typeof(GameObject);
+        if (bTypeIsGameObject)
+            pElementType = typeof(Transform);
 
-        if (pElementType == typeof(GameObject))
-        {
-            // GameObject는 Component가 아니므로, 모든 GameObject가 가지고 있는 Transform을 찾은 뒤 그것을 GameObject로 변환
-            getter = typeof(MonoBehaviour)
-            .GetMethod("GetComponentsInParent", new Type[] { })
-            .MakeGenericMethod(typeof(Transform));
+        MethodInfo pGetMethod = typeof(MonoBehaviour).
+            GetMethod("GetComponentsInParent", new Type[] { }).
+            MakeGenericMethod(pElementType);
 
-            return Convert_TransformArray_To_GameObjectArray(pTargetMono,
-                getter.Invoke(pTargetMono, new object[] { }));
-        }
-
-        return getter.Invoke(pTargetMono, new object[] { });
+        if (bTypeIsGameObject)
+            return Convert_TransformArray_To_GameObjectArray(pTargetMono, pGetMethod.Invoke(pTargetMono, new object[] { }));
+        return pGetMethod.Invoke(pTargetMono, new object[] { });
     }
 
     // ====================================================================================================================
 
-    private static object SetMember_OnGeneric(IGetComponentAttribute pGetComponentAttribute, MonoBehaviour pTargetMono, object pMemberOwner, MemberInfo pMember, System.Type pTypeField)
+    private static object SetMember_OnGeneric(IGetComponentAttribute pGetComponentAttribute, MonoBehaviour pTargetMono, object pMemberOwner, MemberInfo pMember, Type pTypeField)
     {
         object pComponent = null;
-        System.Type pTypeField_Generic = pTypeField.GetGenericTypeDefinition();
+        Type pTypeField_Generic = pTypeField.GetGenericTypeDefinition();
         Type[] arrArgumentsType = pTypeField.GetGenericArguments();
 
         if (pTypeField_Generic == typeof(List<>))
@@ -268,16 +277,16 @@ public static class SCGetComponentAttributeHelper
         object pComponent = pGetComponentAttribute.GetComponent(pTargetMono, arrArgumentsType[0]);
         Array arrComponent = pComponent as Array;
         var Method_Add = pTypeField.GetMethod("Add");
-        var pInstanceList = System.Activator.CreateInstance(pTypeField);
+        var pInstanceList = Activator.CreateInstance(pTypeField);
 
         for (int i = 0; i < arrComponent.Length; i++)
-            Method_Add.Invoke(pInstanceList, new object[] { arrComponent.GetValue(i) });
+            Method_Add.Invoke(pInstanceList, new[] { arrComponent.GetValue(i) });
 
         pMember.SetValue_Extension(pMemberOwner, pInstanceList);
         return pComponent;
     }
 
-    private static object SetMember_OnDictionary(IGetComponentAttribute pAttributeInChildren, MonoBehaviour pTargetMono, object pMemberOwner, MemberInfo pMember, System.Type pTypeField, Type pType_DictionaryKey, Type pType_DictionaryValue)
+    private static object SetMember_OnDictionary(IGetComponentAttribute pAttributeInChildren, MonoBehaviour pTargetMono, object pMemberOwner, MemberInfo pMember, Type pTypeField, Type pType_DictionaryKey, Type pType_DictionaryValue)
     {
         object pComponent = pAttributeInChildren.GetComponent(pTargetMono, pType_DictionaryValue);
         Array arrComponent = pComponent as Array;
@@ -290,7 +299,7 @@ public static class SCGetComponentAttributeHelper
         var Method_Add = pTypeField.GetMethod("Add", new[] {
                                 pType_DictionaryKey, pType_DictionaryValue });
 
-        var pInstanceDictionary = System.Activator.CreateInstance(pTypeField);
+        var pInstanceDictionary = Activator.CreateInstance(pTypeField);
         if (pType_DictionaryKey == typeof(string))
         {
             for (int i = 0; i < arrComponent.Length; i++)
@@ -305,13 +314,13 @@ public static class SCGetComponentAttributeHelper
                 }
                 catch
                 {
-                    Debug.LogError(pComponentChild.name + " Get Compeont - Dictionary Add - Overlap Key MonoType : " + pTargetMono.GetType() + "/Member : " + pMember.Name, pTargetMono);
+                    Debug.LogError(pComponentChild.name + " Get Component - Dictionary Add - Overlap Key MonoType : " + pTargetMono.GetType() + "/Member : " + pMember.Name, pTargetMono);
                 }
             }
         }
         else if (pType_DictionaryKey.IsEnum)
         {
-            HashSet<string> setEnumName = new HashSet<string>(System.Enum.GetNames(pType_DictionaryKey));
+            HashSet<string> setEnumName = new HashSet<string>(Enum.GetNames(pType_DictionaryKey));
             for (int i = 0; i < arrComponent.Length; i++)
             { 
                 try
@@ -320,12 +329,15 @@ public static class SCGetComponentAttributeHelper
                     if (setEnumName.Contains(pComponentChild.name) == false)
                         continue;
 
-                    var pEnum = System.Enum.Parse(pType_DictionaryKey, pComponentChild.name, true);
-                    Method_Add.Invoke(pInstanceDictionary, new object[] {
+                    var pEnum = Enum.Parse(pType_DictionaryKey, pComponentChild.name, true);
+                    Method_Add.Invoke(pInstanceDictionary, new[] {
                                     pEnum,
                                     pComponentChild });
                 }
-                catch { }
+                catch
+                {
+                    // ignored
+                }
             }
         }
 
@@ -349,21 +361,20 @@ public static class SCGetComponentAttributeHelper
 
 public static class Component_Extension
 {
-    public static UnityEngine.Object GetComponentInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
+    public static UnityEngine.Object GetComponentInChildren_SameName(this Component pTarget, string strObjectName, Type pComponentType, bool bInclude_OnDisable)
     {
         List<UnityEngine.Object> listComponent = GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_OnDisable);
         if (listComponent.Count > 0)
             return listComponent[0];
-        else
-            return null;
+        return null;
     }
 
-    public static UnityEngine.Object[] GetComponentsInChildren_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
+    public static UnityEngine.Object[] GetComponentsInChildren_SameName(this Component pTarget, string strObjectName, Type pComponentType, bool bInclude_OnDisable)
     {
         return GetComponentsInChildrenList_SameName(pTarget, strObjectName, pComponentType, bInclude_OnDisable).ToArray();
     }
 
-    public static List<UnityEngine.Object> GetComponentsInChildrenList_SameName(this Component pTarget, string strObjectName, System.Type pComponentType, bool bInclude_OnDisable)
+    public static List<UnityEngine.Object> GetComponentsInChildrenList_SameName(this Component pTarget, string strObjectName, Type pComponentType, bool bInclude_OnDisable)
     {
         Component[] arrComponentFind = null;
         if (pComponentType == typeof(GameObject))
@@ -392,7 +403,7 @@ public static class Component_Extension
 
 public static class MemberInfo_Extension
 {
-    public static System.Type MemberType(this MemberInfo pMemberInfo)
+    public static Type MemberType(this MemberInfo pMemberInfo)
     {
         FieldInfo pFieldInfo = pMemberInfo as FieldInfo;
         if (pFieldInfo != null)
@@ -415,13 +426,7 @@ public static class MemberInfo_Extension
         if (pObjectValue == null)
             return true;
 
-        bool bResult;
-        UnityEngine.Object pUnityObject = pObjectValue as UnityEngine.Object;
-        if (pObjectValue is UnityEngine.Object)
-            bResult = pUnityObject == null;
-        else
-            bResult = pObjectValue == null;
-        return bResult;
+        return false;
     }
 
     public static void SetValue_Extension(this MemberInfo pMemberInfo, object pTarget, object pValue)

@@ -52,7 +52,7 @@ namespace GetComponentAttribute_Test
 
         public void Awake()
         {
-            SCGetComponentAttributeHelper.DoUpdate_GetComponentAttribute(this);
+            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(this);
         }
 
         [Test]

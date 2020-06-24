@@ -65,7 +65,7 @@ namespace GetComponentAttribute_Test
 
         public void Awake()
         {
-            SCGetComponentAttributeHelper.DoUpdate_GetComponentAttribute(this);
+            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(this);
         }
 
         [Test]
@@ -163,10 +163,10 @@ namespace GetComponentAttribute_Test
         }
 
         [Test]
-        public static void 겟컴포넌트칠드런은_같은이름과_같은타입이면_컬렉션에담을수있습니다()
+        public static void 겟컴포넌트인칠드런은_같은이름과_같은타입이면_컬렉션에담을수있습니다()
         {
             // Arrange
-            GameObject pObjectParents = new GameObject(nameof(겟컴포넌트칠드런은_같은이름과_같은타입이면_컬렉션에담을수있습니다));
+            GameObject pObjectParents = new GameObject(nameof(겟컴포넌트인칠드런은_같은이름과_같은타입이면_컬렉션에담을수있습니다));
             int iAddComponentCount = 3;
             for (int i = 0; i < iAddComponentCount; i++)
             {
@@ -203,10 +203,10 @@ namespace GetComponentAttribute_Test
         }
 
         [Test]
-        public static void 부모클래스의_겟컴포넌트애트리뷰트_테스트()
+        public static void 조부모클래스의_겟컴포넌트인칠드런_테스트()
         {
             // Arrange (데이터 정렬)
-            GetComponentTest_Child pComponentTest = new GameObject(nameof(부모클래스의_겟컴포넌트애트리뷰트_테스트)).AddComponent<GetComponentTest_Child>();
+            GetComponentTest_Child pComponentTest = new GameObject(nameof(조부모클래스의_겟컴포넌트인칠드런_테스트)).AddComponent<GetComponentTest_Child>();
             Transform pTransformTest = pComponentTest.transform;
 
             int iRandomCount_1 = Random.Range(3, 6);
@@ -220,13 +220,140 @@ namespace GetComponentAttribute_Test
 
 
             // Act (기능 실행)
-            SCGetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
 
 
 
             // Arrange (확인)
             Assert.AreEqual(pComponentTest.arrTest_1.Length, iRandomCount_1);
             Assert.AreEqual(pComponentTest.arrTest_2.Length, iRandomCount_2);
+        }
+
+        public class GetComponent_ChildrenListTest : MonoBehaviour
+        {
+            [GetComponentInChildren("Test")]
+            public GameObject[] Test_GameObjectArray = null;
+
+            [GetComponentInChildren("Test")]
+            public Transform[] Test_TransformArray = null;
+
+            [GetComponentInChildren("Test")]
+            public List<Transform> Test_GameObjectList = null;
+
+            [GetComponentInChildren("Test")]
+            public List<Transform> Test_TransformList = null;
+        }
+
+
+        [Test]
+        public static void 겟컴포넌트인칠드런_리스트_테스트()
+        {
+            // Arrange (데이터 정렬)
+            GetComponent_ChildrenListTest pComponentTest = new GameObject(nameof(겟컴포넌트인칠드런_리스트_테스트)).AddComponent< GetComponent_ChildrenListTest>();
+            Transform pTransformTest = pComponentTest.transform;
+
+            int iRandomCount_1 = Random.Range(3, 6);
+            for (int i = 0; i < iRandomCount_1; i++)
+                new GameObject("Test").transform.SetParent(pTransformTest);
+
+            int iRandomCount_2 = Random.Range(3, 6);
+            for (int i = 0; i < iRandomCount_2; i++)
+                new GameObject("Test2").transform.SetParent(pTransformTest);
+
+
+
+            // Act (기능 실행)
+            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+
+
+
+            // Arrange (확인)
+            Assert.AreEqual(pComponentTest.Test_GameObjectArray.Length, iRandomCount_1);
+            Assert.AreEqual(pComponentTest.Test_TransformArray.Length, iRandomCount_1);
+            Assert.AreEqual(pComponentTest.Test_GameObjectList.Count, iRandomCount_1);
+            Assert.AreEqual(pComponentTest.Test_TransformList.Count, iRandomCount_1);
+        }
+
+        public class GetComponent_ChildrenDictionaryListTest : MonoBehaviour
+        {
+            public enum EChildObjectName
+            {
+                Child1,
+                Child2,
+            }
+
+            [GetComponentInChildren()]
+            public Dictionary<string, GameObject[]> Test_KeyIs_String_ValueIs_GameObjectArray = new Dictionary<string, GameObject[]>();
+
+            [GetComponentInChildren()]
+            public Dictionary<string, List<GameObject>> Test_KeyIs_String_ValueIs_GameObjectList = new Dictionary<string, List<GameObject>>();
+
+
+
+            [GetComponentInChildren()]
+            public Dictionary<EChildObjectName, GameObject[]> Test_KeyIs_Enum_ValueIs_GameObjectArray = new Dictionary<EChildObjectName, GameObject[]>();
+
+            [GetComponentInChildren()]
+            public Dictionary<EChildObjectName, List<GameObject>> Test_KeyIs_Enum_ValueIs_GameObjectList = new Dictionary<EChildObjectName, List<GameObject>>();
+
+        }
+
+        [Test]
+        public static void 겟컴포넌트인칠드런_딕셔너리_리스트_테스트()
+        {
+            // Arrange (데이터 정렬)
+            GetComponent_ChildrenDictionaryListTest pComponentTest = new GameObject(nameof(겟컴포넌트인칠드런_딕셔너리_리스트_테스트)).AddComponent<GetComponent_ChildrenDictionaryListTest>();
+            Transform pTransformTest = pComponentTest.transform;
+
+            int iRandomCount_1 = Random.Range(3, 6);
+            for (int i = 0; i < iRandomCount_1; i++)
+                new GameObject(nameof(GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child1)).transform.SetParent(pTransformTest);
+
+            int iRandomCount_2 = Random.Range(3, 6);
+            for (int i = 0; i < iRandomCount_2; i++)
+                new GameObject(nameof(GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child2)).transform.SetParent(pTransformTest);
+
+
+
+            // Act (기능 실행)
+            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+
+
+
+            // Arrange (확인)
+            Assert.AreEqual(
+                pComponentTest.Test_KeyIs_String_ValueIs_GameObjectArray[nameof(GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child1)].Length,
+                iRandomCount_1);
+
+            Assert.AreEqual(
+                pComponentTest.Test_KeyIs_String_ValueIs_GameObjectArray[nameof(GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child2)].Length,
+                iRandomCount_2);
+            
+            Assert.AreEqual(
+                pComponentTest.Test_KeyIs_String_ValueIs_GameObjectList[nameof(GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child1)].Count,
+                iRandomCount_1); 
+            
+            Assert.AreEqual(
+                pComponentTest.Test_KeyIs_String_ValueIs_GameObjectList[nameof(GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child2)].Count,
+                iRandomCount_2);
+
+
+
+            Assert.AreEqual(
+                pComponentTest.Test_KeyIs_Enum_ValueIs_GameObjectArray[GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child1].Length,
+                iRandomCount_1);
+
+            Assert.AreEqual(
+                pComponentTest.Test_KeyIs_Enum_ValueIs_GameObjectArray[GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child2].Length,
+                iRandomCount_2);
+
+            Assert.AreEqual(
+                pComponentTest.Test_KeyIs_Enum_ValueIs_GameObjectList[GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child1].Count,
+                iRandomCount_1);
+
+            Assert.AreEqual(
+                pComponentTest.Test_KeyIs_Enum_ValueIs_GameObjectList[GetComponent_ChildrenDictionaryListTest.EChildObjectName.Child2].Count,
+                iRandomCount_2);
         }
     }
 
