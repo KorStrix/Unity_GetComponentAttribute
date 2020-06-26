@@ -29,17 +29,17 @@ namespace GetComponentAttribute_Test
         }
 
 
-        [GetComponentInParent] public Test_ComponentParents p_pParents = null;
+        [GetComponentInParent]
+        public Test_ComponentParents p_pParents = null;
 
-        [GetComponentInChildren] public List<Test_ComponentChild> p_listTest = new List<Test_ComponentChild>();
-
-        [GetComponentInChildren]
-        public Dictionary<string, Test_ComponentChild> p_mapTest_KeyIsString =
-            new Dictionary<string, Test_ComponentChild>();
+        [GetComponentInChildren] 
+        public List<Test_ComponentChild> p_listTest = new List<Test_ComponentChild>();
 
         [GetComponentInChildren]
-        private Dictionary<ETestChildObject, Test_ComponentChild> p_mapTest_KeyIsEnum =
-            new Dictionary<ETestChildObject, Test_ComponentChild>();
+        public Dictionary<string, Test_ComponentChild> p_mapTest_KeyIsString = new Dictionary<string, Test_ComponentChild>();
+
+        [GetComponentInChildren]
+        private Dictionary<ETestChildObject, Test_ComponentChild> p_mapTest_KeyIsEnum = new Dictionary<ETestChildObject, Test_ComponentChild>();
 
         [GetComponentInChildren(nameof(ETestChildObject.TestObject_Other_FindString))]
         private Test_ComponentChild p_pChildComponent_FindString = null;
@@ -54,11 +54,14 @@ namespace GetComponentAttribute_Test
         private GameObject p_pObject_FindEnum = null;
 
 
-        [GetComponentInChildren] public Test_ComponentChild p_pChildComponent_FindEnumProperty { get; private set; }
+        [GetComponentInChildren] 
+        public Test_ComponentChild p_pChildComponent_FindEnumProperty { get; private set; }
 
-        [GetComponent] Test_ComponentOnly[] arrComponent = null;
+        [GetComponent] 
+        Test_ComponentOnly[] arrComponent = null;
 
-        [GetComponentInChildren] GameObject[] arrObject_Children = null;
+        [GetComponentInChildren]
+        GameObject[] arrObject_Children = null;
 
         [GetComponentInChildren("Test")]
         public List<Test_ComponentChild_SameName> listChildren_NameIs_Test { get; private set; }
@@ -282,18 +285,18 @@ namespace GetComponentAttribute_Test
                 Child2,
             }
 
-            [GetComponentInChildren()]
+            [GetComponentInChildren]
             public Dictionary<string, GameObject[]> Test_KeyIs_String_ValueIs_GameObjectArray = new Dictionary<string, GameObject[]>();
 
-            [GetComponentInChildren()]
+            [GetComponentInChildren]
             public Dictionary<string, List<GameObject>> Test_KeyIs_String_ValueIs_GameObjectList = new Dictionary<string, List<GameObject>>();
 
 
 
-            [GetComponentInChildren()]
+            [GetComponentInChildren]
             public Dictionary<EChildObjectName, GameObject[]> Test_KeyIs_Enum_ValueIs_GameObjectArray = new Dictionary<EChildObjectName, GameObject[]>();
 
-            [GetComponentInChildren()]
+            [GetComponentInChildren]
             public Dictionary<EChildObjectName, List<GameObject>> Test_KeyIs_Enum_ValueIs_GameObjectList = new Dictionary<EChildObjectName, List<GameObject>>();
 
         }

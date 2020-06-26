@@ -50,10 +50,6 @@ namespace GetComponentAttribute_Test
         [GetComponentInChildren(ETestChildObject.TestObject_Other_FindEnum)]
         private GameObject p_pObject_FindEnum = null;
 
-        public void Awake()
-        {
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(this);
-        }
 
         [Test]
         public static void GetComponentChildren_Field_Test()
@@ -69,7 +65,7 @@ namespace GetComponentAttribute_Test
                 pObjectChild.AddComponent<Test_ComponentChild_ForPerformance>();
             }
 
-            int iTestDummy = 5000;
+            const int iTestDummy = 50000;
             for (int i = 0; i < iTestDummy; i++)
             {
                 GameObject pObjectChild = new GameObject(i.ToString());
@@ -79,17 +75,12 @@ namespace GetComponentAttribute_Test
 
 
             // 자식을 전부 추가한 뒤에 페런츠에 추가한다.
-            // 추가하자마자 Awake로 자식을 찾기 때문
             GetComponentAttribute_PerformanceTest pParents = pObjectParents.AddComponent<GetComponentAttribute_PerformanceTest>();
+            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pParents);
 
             Check_Dictionary(pParents.p_mapTest_KeyIsEnum, iChildCount);
             Check_Dictionary(pParents.p_mapTransform_KeyIsEnum, iChildCount);
             Check_Dictionary(pParents.p_mapGameObject_KeyIsEnum, iChildCount);
-
-
-            //Check_Dictionary(pParents.p_mapTransform_KeyIsString, iChildCount + iTestDummy + 1);
-            //Check_Dictionary(pParents.p_mapGameObject_KeyIsString, iChildCount + iTestDummy + 1);
-
 
 
             Assert.NotNull(pParents.p_pChildComponent_FindEnum);
@@ -99,13 +90,46 @@ namespace GetComponentAttribute_Test
             Assert.NotNull(pParents.p_pObject_FindEnum);
         }
 
+
+        [Test]
+        public static void GetComponentChildren_Field_Test_NotUseAttribute()
+        {
+            GameObject pObjectParents = new GameObject(nameof(GetComponentChildren_Field_Test_NotUseAttribute));
+
+            // GetComponent 대상인 자식 추가
+            int iChildCount = (int)ETestChildObject.MAX;
+            for (int i = 0; i < iChildCount; i++)
+            {
+                GameObject pObjectChild = new GameObject(((ETestChildObject)i).ToString());
+                pObjectChild.transform.SetParent(pObjectParents.transform);
+                pObjectChild.AddComponent<Test_ComponentChild_ForPerformance>();
+            }
+
+            const int iTestDummy = 50000;
+            for (int i = 0; i < iTestDummy; i++)
+            {
+                GameObject pObjectChild = new GameObject(i.ToString());
+                pObjectChild.transform.SetParent(pObjectParents.transform);
+                pObjectChild.AddComponent<Test_ComponentChild_ForPerformance>();
+            }
+
+
+            GetComponentAttribute_PerformanceTest pParents = pObjectParents.AddComponent<GetComponentAttribute_PerformanceTest>();
+            pParents.GetComponentsInChildren<Test_ComponentChild_ForPerformance>();
+            pParents.GetComponentsInChildren<Transform>();
+            pParents.GetComponentsInChildren<Transform>(); // GameObject
+        }
+
+
         private static void Check_Dictionary<TKey, TValue>(Dictionary<TKey, TValue> mapTestTarget, int iChildCount)
             where TValue : UnityEngine.Object
         {
             Assert.AreEqual(mapTestTarget.Count, iChildCount);
             var pIterEnum = mapTestTarget.GetEnumerator();
             while (pIterEnum.MoveNext())
-                Assert.IsTrue(pIterEnum.Current.Key.ToString() == pIterEnum.Current.Value.name.ToString());
+                Assert.IsTrue(pIterEnum.Current.Key.ToString() == pIterEnum.Current.Value.name);
+
+            pIterEnum.Dispose();
         }
     }
 }
