@@ -185,22 +185,22 @@ public static class GetComponentAttributeSetter
 
     public static object Event_GetComponentInChildren(MonoBehaviour pMono, Type pElementType, bool bInclude_DeActive, bool bSearch_By_ComponentName, string strComponentName)
     {
+        object pObjectReturn;
+
+        MethodInfo pGetMethod = typeof(MonoBehaviour).GetMethod("GetComponentsInChildren", new[] { typeof(bool) }).MakeGenericMethod(pElementType);
 
         if (pElementType.HasElementType)
-            pElementType = pElementType.GetElementType();
+		    pElementType = pElementType.GetElementType();
 
-        bool bTypeIsGameObject = pElementType == typeof(GameObject);
-        if (bTypeIsGameObject)
-            pElementType = typeof(Transform);
-
-        // ReSharper disable once PossibleNullReferenceException
-        MethodInfo pGetMethod = typeof(MonoBehaviour).
-            GetMethod("GetComponentsInChildren", new[] { typeof(bool) }).
-            MakeGenericMethod(pElementType);
-
-        object pObjectReturn = bTypeIsGameObject ?
-            Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pMono, new object[] { bInclude_DeActive })) :
-            pGetMethod.Invoke(pMono, new object[] { bInclude_DeActive });
+        if(pElementType == typeof(GameObject))
+        {
+	        pElementType = typeof(Transform);
+	        pObjectReturn = Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pMono, new object[] { bInclude_DeActive }))
+        }
+        else
+        {
+	        pObjectReturn = pGetMethod.Invoke(pMono, new object[] { bInclude_DeActive });
+        }
 
         if (bSearch_By_ComponentName)
             return ExtractSameNameArray(strComponentName, pObjectReturn as UnityEngine.Object[]);
