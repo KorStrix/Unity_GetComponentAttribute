@@ -1,7 +1,5 @@
 # 개요
 
-[Unity GetComponent Attribute 블로그 글 링크](https://github.com/KorStrix/Unity_GetComponentAttribute)
-
 유니티에서 자주 사용되는 **GetComponent, GetComponentInParents, GetComponentInChildren 등을**
 
 속성으로 구현하여 **원하는 때에 해당 변수나 프로퍼티에 자동으로 할당** 할 수 있는 프로젝트입니다.
@@ -198,10 +196,9 @@ public class GetComponentAttribute_Example : MonoBehaviour
 <br>
 
 # 그 외
-[Unity GetComponent Attribute 블로그 글 링크](https://github.com/KorStrix/Unity_GetComponentAttribute)
 
-## 참고한 프로젝트
-- https://openlevel.postype.com/post/683269
+## 참고한 프로젝트 - 
+- [Unity3D 자동 GetComponent 블로그 링크](https://openlevel.postype.com/post/683269)
 
 ## 연락처
 유니티 개발자 모임 카카오톡 & 디스코드 링크입니다.
