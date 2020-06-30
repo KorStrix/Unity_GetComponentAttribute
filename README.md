@@ -14,7 +14,7 @@
 
 # 예시
 
-## Before Workflow
+### Before Workflow
 ```csharp
 // 기존 작업 방식은 public이나
 public GameObject pLegacyWorkflow_Public_Inspector_Link;
@@ -43,7 +43,7 @@ private GameObject FindChildObject(string strObjectName)
 }
 ```
 
-## After Workflow
+### After Workflow
 
 ```csharp
 [GetComponentInChildren("Somthing Require GameObject Name In Children")]
@@ -62,14 +62,15 @@ void Awake()
 <br>
 
 # 주의사항
-## 설치 주의사항
+
+### 설치 주의사항
 유니티 `2017 ~ 2018버젼까지 동작 확인`하였으며,
 
 **유니티 5버젼 이하는 Assembly Definition을 지원하지 않아 정상동작하지 않을 수 있습니다.**
 
 Test 코드로 인하여 ``Assembly Defintion``을 사용했습니다.
 
-## 사용 주의사항
+### 사용 주의사항
 - Awake시 다음과 같이 Manager의 함수를 호출해야 합니다.
 
 ```csharp
@@ -197,10 +198,10 @@ public class GetComponentAttribute_Example : MonoBehaviour
 
 # 그 외
 
-## 참고한 프로젝트 - 
+### 참고한 프로젝트 - 
 - [Unity3D 자동 GetComponent 블로그 링크](https://openlevel.postype.com/post/683269)
 
-## 연락처
+### 연락처
 유니티 개발자 모임 카카오톡 & 디스코드 링크입니다.
 
 - 카카오톡 : https://open.kakao.com/o/gOi17az
