@@ -118,8 +118,6 @@ private Transform p_pChildComponent_FindString = null;
 private Transform p_pChildComponent_FindEnum = null;
 ```
 
-<br>
-
 #### 2-1. Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
 
 GameObject의 이름을 기반으로 찾습니다.
@@ -139,9 +137,7 @@ private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<str
 Transform[] arrComponent = null;
 ```
 
-#### 2-2. 중복된 이름의 오브젝트를 Collection로 담는것도 지원 (GetComponent, GetComponentInChidlren)
-
-GameObject의 이름을 기반으로 찾습니다.
+#### 2-2. 중복된 이름의 오브젝트를 Collection로 담는것도 지원 (GetComponent, GetComponentInChidlren).
 - Array와 List만 지원합니다.
 
 ```csharp
