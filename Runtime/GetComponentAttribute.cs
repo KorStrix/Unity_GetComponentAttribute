@@ -185,6 +185,10 @@ public static class GetComponentAttributeSetter
 
     public static object Event_GetComponentInChildren(MonoBehaviour pMono, Type pElementType, bool bInclude_DeActive, bool bSearch_By_ComponentName, string strComponentName)
     {
+        // ReSharper disable once PossibleNullReferenceException
+        MethodInfo pGetMethod = typeof(MonoBehaviour).
+            GetMethod("GetComponentsInChildren", new[] { typeof(bool) }).
+            MakeGenericMethod(pElementType);
 
         if (pElementType.HasElementType)
 	        pElementType = pElementType.GetElementType();
