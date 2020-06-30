@@ -63,75 +63,6 @@ void Awake()
 <br>
 <br>
 
-## 성능 테스트
-Unity의 GetComponent 함수와 transform Property, Attribute 성능 비교 코드입니다.
-
-```csharp
-string strTestCase = ETestCase.GetComponent_DefulatProperty.ToString();
- for(int i = 0; i < iTestCase; i++)
- {
-     SCManagerProfiler.DoStartTestCase(strTestCase);
-     GetComponent_Property = null;
-     GetComponent_Property = transform;
-     GetComponent_Property.GetType();
-     SCManagerProfiler.DoFinishTestCase(strTestCase);
- }
-
- strTestCase = ETestCase.GetComponet_Function.ToString();
- for (int i = 0; i < iTestCase; i++)
- {
-     SCManagerProfiler.DoStartTestCase(strTestCase);
-     GetComponent_Function = null;
-     GetComponent_Function = GetComponent<Transform>();
-     GetComponent_Function.GetType();
-     SCManagerProfiler.DoFinishTestCase(strTestCase);
- }
-
- strTestCase = ETestCase.GetComponetsInChildren_Function.ToString();
- for (int i = 0; i < iTestCase; i++)
- {
-     SCManagerProfiler.DoStartTestCase(strTestCase);
-     GetComponentsChildren_Children_Function = null;
-     GetComponentsChildren_Children_Function = GetComponentsInChildren<Transform>();
-     GetComponentsChildren_Children_Function[0].GetType();
-     SCManagerProfiler.DoFinishTestCase(strTestCase);
- }
-
- strTestCase = ETestCase.GetComponet_Attribute_Individual.ToString();
- for (int i = 0; i < iTestCase; i++)
- {
-     SCManagerProfiler.DoStartTestCase(strTestCase);
-     GetComponent_Attribute = null;
-     SCManagerGetComponent.DoUpdateGetComponentAttribute(this, this, pMemberInfo);
-     GetComponent_Attribute.GetType();
-     SCManagerProfiler.DoFinishTestCase(strTestCase);
- }
-
- strTestCase = ETestCase.GetComponet_Attribute_All.ToString();
- for (int i = 0; i < iTestCase; i++)
- {
-     SCManagerProfiler.DoStartTestCase(strTestCase);
-     GetComponentsChildren_Children_Attribute = null;
-     SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
-     GetComponentsChildren_Children_Attribute[0].GetType();
-     SCManagerProfiler.DoFinishTestCase(strTestCase);
- }
-
- SCManagerProfiler.DoPrintResult_PrintLog_IsError(true);
-```
-
-<br>
-
-### 성능 결과
-1만번 호출 결과 GetComponent Property나 함수의 경우 밀리 세컨드단위로 떨어질정도로 작지만,
-GetComponentAttribute도 1초정도로 짧으며, 빌드 후에는 더 짧습니다.
-
-![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/Profiler.png?raw=true)
-
-<br>
-<br>
-<br>
-
 ## 설치 주의사항
 유니티 `2017 ~ 2018버젼까지 동작 확인`하였으며,
 
@@ -255,28 +186,6 @@ public class GetComponentAttribute_Example : MonoBehaviour
   }
 }
 ```
-
-<br>
-<br>
-<br>
-
-#### 5. ChildRequireComponentAttribute (동봉된 별도의 Attribute입니다.)
-- 자식 오브젝트중에 같은 이름으로 된 해당 타입의 오브젝트가 할당되었는지 인스펙터에 한눈에 파악할 수 있도록 보여줍니다.
-  - **Play Mode가 Edit Mode일 경우에도 자동으로 할당하여 체크합니다.**
-  - **오딘을 사용할 경우 밑에 따로 한곳에 나열되어 나타납니다.**
-
-- **Before Odin**
-
-![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/ChildRequireComponent_BeforeOdin.png?raw=true)
-
-<br>
-<br>
-<br>
-
-- **After Odin** 위와 같은 스크립트지만 프로퍼티 및 Dictionary가 Inspector에 나타며, 맨 밑에 한 곳에 몰아서 리스트를 그려줍니다.
-
-![](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Images_ForGhithub/ChildRequireComponent_AfterOdin.png?raw=true)
-
 
 <br>
 <br>
