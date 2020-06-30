@@ -60,6 +60,9 @@ namespace GetComponentAttribute_Test
         [GetComponent] 
         Test_ComponentOnly[] arrComponent = null;
 
+        [GetComponent]
+        List<Test_ComponentOnly> listComponent = new List<Test_ComponentOnly>();
+
         [GetComponentInChildren]
         GameObject[] arrObject_Children = null;
 
@@ -68,7 +71,7 @@ namespace GetComponentAttribute_Test
 
         public void Awake()
         {
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(this);
+            GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this);
         }
 
         [Test]
@@ -163,6 +166,7 @@ namespace GetComponentAttribute_Test
 
             GetComponentAttribute_Test pParents = pObjectParents.AddComponent<GetComponentAttribute_Test>();
             Assert.AreEqual(pParents.arrComponent.Length, iAddComponentCount);
+            Assert.AreEqual(pParents.listComponent.Count, iAddComponentCount);
         }
 
         [Test]
@@ -223,7 +227,7 @@ namespace GetComponentAttribute_Test
 
 
             // Act (기능 실행)
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+            GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(pComponentTest);
 
 
 
@@ -266,7 +270,7 @@ namespace GetComponentAttribute_Test
 
 
             // Act (기능 실행)
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+            GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(pComponentTest);
 
 
 
@@ -319,7 +323,7 @@ namespace GetComponentAttribute_Test
 
 
             // Act (기능 실행)
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+            GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(pComponentTest);
 
 
 

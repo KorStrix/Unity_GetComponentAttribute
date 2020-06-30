@@ -44,7 +44,7 @@ public class GetComponentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pMono, Type pElementType)
     {
-        return GetComponentAttributeHelper.Event_GetComponent(pMono, pElementType);
+        return GetComponentAttributeSetter.Event_GetComponent(pMono, pElementType);
     }
 }
 
@@ -52,7 +52,7 @@ public class GetComponentInParentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pMono, Type pElementType)
     {
-        return GetComponentAttributeHelper.Event_GetComponentInParents(pMono, pElementType);
+        return GetComponentAttributeSetter.Event_GetComponentInParents(pMono, pElementType);
     }
 }
 
@@ -112,13 +112,15 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase, IGetCo
 
     public override object GetComponent(MonoBehaviour pMono, Type pElementType)
     {
-        return GetComponentAttributeHelper.Event_GetComponentInChildren(pMono, pElementType, bInclude_OnDisable, bSearch_By_ComponentName, strComponentName);
+        return GetComponentAttributeSetter.Event_GetComponentInChildren(pMono, pElementType, bInclude_OnDisable, bSearch_By_ComponentName, strComponentName);
     }
 }
 
 
-
-public static class GetComponentAttributeHelper
+/// <summary>
+/// GetComponent Attribute가 적힌 필드 / 프로퍼티를 할당시켜주는 Static Class
+/// </summary>
+public static class GetComponentAttributeSetter
 {
     public static UnityEngine.Object[] ExtractSameNameArray(string strObjectName, UnityEngine.Object[] arrComponentFind)
     {
@@ -155,20 +157,21 @@ public static class GetComponentAttributeHelper
         foreach(var pGetComponentAttribute in arrCustomAttributes)
         {
             object pComponent = SetMember_FromGetComponent(pTargetMono, pMemberOwner, pMemberInfo, pMemberType, pGetComponentAttribute);
-            if (pComponent == null)
+            if (pComponent != null)
+                continue;
+
+            if (pGetComponentAttribute.bIsPrint_OnNotFound_GetComponent)
             {
-                if (pGetComponentAttribute.bIsPrint_OnNotFound_GetComponent)
-                {
-                    if (pGetComponentAttribute is GetComponentInChildrenAttribute pAttribute && pAttribute.bSearch_By_ComponentName)
-                        Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}>({2}) Result == null", pGetComponentAttribute.GetType().Name, pMemberType, pAttribute.strComponentName), pTargetMono);
-                    else
-                        Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}> Result == null", pGetComponentAttribute.GetType().Name, pMemberType), pTargetMono);
-                }
+                if (pGetComponentAttribute is GetComponentInChildrenAttribute pAttribute && pAttribute.bSearch_By_ComponentName)
+                    Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}>({2}) Result == null", pGetComponentAttribute.GetType().Name, pMemberType, pAttribute.strComponentName), pTargetMono);
+                else
+                    Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}> Result == null", pGetComponentAttribute.GetType().Name, pMemberType), pTargetMono);
             }
         }
     }
 
     // ====================================================================================================================
+
 
     public static object Event_GetComponent(MonoBehaviour pMono, Type pElementType)
     {
@@ -278,27 +281,19 @@ public static class GetComponentAttributeHelper
 
     private static object GetComponent_OnGeneric(IGetComponentAttribute iGetComponentAttribute, MonoBehaviour pMono, Type pTypeField)
     {
-        IGetComponentChildrenAttribute iGetComponentAttribute_InChildren = iGetComponentAttribute as IGetComponentChildrenAttribute;
-        if (iGetComponentAttribute_InChildren == null)
-        {
-            Debug.LogError("Error", pMono);
-            return null;
-        }
-
-
         Type pTypeField_Generic = pTypeField.GetGenericTypeDefinition();
         Type[] arrArgumentsType = pTypeField.GetGenericArguments();
 
         object pComponent = null;
         if (pTypeField_Generic == typeof(List<>))
-            pComponent = GetComponent_OnList(iGetComponentAttribute_InChildren, pMono, pTypeField, arrArgumentsType[0]);
+            pComponent = GetComponent_OnList(iGetComponentAttribute, pMono, pTypeField, arrArgumentsType[0]);
         else if (pTypeField_Generic == typeof(Dictionary<,>))
-            pComponent = GetComponent_OnDictionary(iGetComponentAttribute_InChildren, pMono, pTypeField, arrArgumentsType[0], arrArgumentsType[1]);
+            pComponent = GetComponent_OnDictionary(iGetComponentAttribute as IGetComponentChildrenAttribute, pMono, pTypeField, arrArgumentsType[0], arrArgumentsType[1]);
 
         return pComponent;
     }
 
-    private static object GetComponent_OnList(IGetComponentChildrenAttribute iGetComponentAttribute, MonoBehaviour pMono, Type pTypeMember, Type pElementType)
+    private static object GetComponent_OnList(IGetComponentAttribute iGetComponentAttribute, MonoBehaviour pMono, Type pTypeMember, Type pElementType)
     {
         Array arrComponent = iGetComponentAttribute.GetComponent(pMono, pElementType) as Array;
         if (arrComponent == null || arrComponent.Length == 0)
@@ -325,9 +320,15 @@ public static class GetComponentAttributeHelper
 
     private static object GetComponent_OnDictionary(IGetComponentChildrenAttribute pAttributeInChildren, MonoBehaviour pMono, Type pMemberType, Type pType_DictionaryKey, Type pType_DictionaryValue)
     {
+        if(pAttributeInChildren == null)
+        {
+            Debug.LogError($"Dictionary Field Type Not Support Non-IGetComponentChildrenAttribute - {pType_DictionaryKey.Name}");
+            return null;
+        }
+
         if (pType_DictionaryKey != typeof(string) && pType_DictionaryKey.IsEnum == false)
         {
-            Debug.LogError($"Not Support Dictionary Key - {pType_DictionaryKey.Name}");
+            Debug.LogError($"Not Support Dictionary Key - {pType_DictionaryKey.Name} - pType_DictionaryKey != typeof(string) && pType_DictionaryKey.IsEnum == false");
             return null;
         }
 
