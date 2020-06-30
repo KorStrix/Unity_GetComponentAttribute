@@ -1,4 +1,4 @@
-# Unity-GetComponent-Attribute
+# 개요
 
 [Unity GetComponent Attribute 블로그 글 링크](https://github.com/KorStrix/Unity_GetComponentAttribute)
 
@@ -12,8 +12,8 @@
   - 오딘을 사용하지 않을 경우 Property, Dictionary 등이 인스펙터에 나타나지 않습니다.
   - **(Property, Dictionary도 동작은 정상동작합니다. 인스펙터에 그려지지만 않을 뿐입니다.)**
 
-
-# 예시 코드
+<br>
+# 예시
 
 ## Before Workflow
 ```csharp
@@ -60,6 +60,7 @@ void Awake()
 }
 ```
 
+# 주의사항
 ## 설치 주의사항
 유니티 `2017 ~ 2018버젼까지 동작 확인`하였으며,
 
@@ -90,14 +91,11 @@ private Transform pTransform2 = null; // 컴파일러가 경고를 출력하지 
 ```
 
 <br>
-<br>
-<br>
+# 기능들
 
-## 기능들
+### 1. 유니티가 지원하는 GetComponent, GetComponents, GetComponenInParents, GetComponentInChildren, GetComponentsInChildren 등을 지원
 
-#### 1. 유니티가 지원하는 GetComponent, GetComponents, GetComponenInParents, GetComponentInChildren, GetComponentsInChildren 등을 지원
-
-#### 2. GetComponentInChildren Attribute
+### 2. GetComponentInChildren Attribute
 - 하위 오브젝트에 **같은 타입의 오브젝트가 여러개 있을 경우, 이름으로 찾아서 할당하는 기능**
 
 ```csharp
@@ -117,7 +115,7 @@ private Transform p_pChildComponent_FindEnum = null;
 ```
 <br>
 
-##### 2-1. Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
+#### 2-1. Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
 
 GameObject의 이름을 기반으로 찾습니다.
 
@@ -136,7 +134,7 @@ private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<str
 Transform[] arrComponent = null;
 ```
 
-##### 2-2. 중복된 이름의 오브젝트를 Collection로 담는것도 지원 (GetComponent, GetComponentInChidlren)
+#### 2-2. 중복된 이름의 오브젝트를 Collection로 담는것도 지원 (GetComponent, GetComponentInChidlren)
 
 GameObject의 이름을 기반으로 찾습니다.
 - Array와 List만 지원합니다.
@@ -159,7 +157,7 @@ private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<str
 
 ```
 
-#### 3. 변수, 프로퍼티 구분없이 지원
+### 3. 변수, 프로퍼티 구분없이 지원
 - **주의사항으로, set 한정자는 해당 클래스가 접근이 가능하게 해야 합니다.**
 
 ```csharp
@@ -167,7 +165,7 @@ private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<str
 public Transform p_pChildComponent_FindEnumProperty { get; private set; }
 ```
 
-#### 4. Monobehaviour를 상속받지 않은 클래스도 지원
+### 4. Monobehaviour를 상속받지 않은 클래스도 지원
 ```csharp
 public class GetComponentAttribute_Example : MonoBehaviour
 {
@@ -192,7 +190,7 @@ public class GetComponentAttribute_Example : MonoBehaviour
 ```
 
 <br>
-
+# 그 외
 [Unity GetComponent Attribute 블로그 글 링크](https://github.com/KorStrix/Unity_GetComponentAttribute)
 
 ## 참고한 프로젝트
