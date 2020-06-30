@@ -13,6 +13,7 @@
   - **(Property, Dictionary도 동작은 정상동작합니다. 인스펙터에 그려지지만 않을 뿐입니다.)**
 
 <br>
+
 # 예시
 
 ## Before Workflow
@@ -60,6 +61,8 @@ void Awake()
 }
 ```
 
+<br>
+
 # 주의사항
 ## 설치 주의사항
 유니티 `2017 ~ 2018버젼까지 동작 확인`하였으며,
@@ -80,6 +83,7 @@ private void Awake()
     SCManagerGetComponent.DoUpdateGetComponentAttribute(this, p_pNotInherit_Mono);
 }
 ```
+
 - 다음과 같이 = null을 안할 경우 유니티 컴파일러가 변수를 할당하지 않았다는 경고를 출력합니다.
 
 ```csharp
@@ -91,6 +95,7 @@ private Transform pTransform2 = null; // 컴파일러가 경고를 출력하지 
 ```
 
 <br>
+
 # 기능들
 
 ### 1. 유니티가 지원하는 GetComponent, GetComponents, GetComponenInParents, GetComponentInChildren, GetComponentsInChildren 등을 지원
@@ -113,6 +118,7 @@ private Transform p_pChildComponent_FindString = null;
 [GetComponentInChildren(ETestChildObject.TestObject_Other_FindEnum)]
 private Transform p_pChildComponent_FindEnum = null;
 ```
+
 <br>
 
 #### 2-1. Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
@@ -190,6 +196,7 @@ public class GetComponentAttribute_Example : MonoBehaviour
 ```
 
 <br>
+
 # 그 외
 [Unity GetComponent Attribute 블로그 글 링크](https://github.com/KorStrix/Unity_GetComponentAttribute)
 
