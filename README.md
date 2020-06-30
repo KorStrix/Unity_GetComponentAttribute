@@ -15,8 +15,8 @@
 
 # 예시 코드
 
+## Before Workflow
 ```csharp
-// Before
 // 기존 작업 방식은 public이나
 public GameObject pLegacyWorkflow_Public_Inspector_Link;
 
@@ -42,9 +42,11 @@ private GameObject FindChildObject(string strObjectName)
   Transform[] arrAllChildObject = GetComponentsInChildren<Transform>();
   // 포문으로 돌리며 이름으로 찾아서 리턴하는 로직
 }
+```
 
-// --------------------------- After ---------------------------
+## After Workflow
 
+```csharp
 [GetComponentInChildren("Somthing Require GameObject Name In Children")]
 private GameObject pPrivate_Find_Name;
 
@@ -99,29 +101,25 @@ private Transform pTransform2 = null; // 컴파일러가 경고를 출력하지 
 - 하위 오브젝트에 **같은 타입의 오브젝트가 여러개 있을 경우, 이름으로 찾아서 할당하는 기능**
 
 ```csharp
-
 public enum ETestChildObject
 {
   TestObject_Other_FindString,
   TestObject_Other_FindEnum,
 }
 
-[SerializeField]
-[GetComponentInChildren(nameof(ETestChildObject.TestObject_Other_FindString))]
 // Attribute 매개변수로 nameof연산자를 통해 string이 들어간 경우입니다.
+[GetComponentInChildren(nameof(ETestChildObject.TestObject_Other_FindString))]
 private Transform p_pChildComponent_FindString = null;
 
-[SerializeField]
-[GetComponentInChildren(ETestChildObject.TestObject_Other_FindEnum)]
 // Attribute 매개변수로 Enum이 들어간 경우입니다.
+[GetComponentInChildren(ETestChildObject.TestObject_Other_FindEnum)]
 private Transform p_pChildComponent_FindEnum = null;
 ```
-
-<br>
-<br>
 <br>
 
-- Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
+##### 2-1. Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
+
+GameObject의 이름을 기반으로 찾습니다.
 
 ```csharp
 [GetComponentInChildren]
@@ -136,6 +134,29 @@ private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<str
 [SerializeField]
 [GetComponentInChildren] // Array의 경우 null을 대입해도 정상 동작
 Transform[] arrComponent = null;
+```
+
+##### 2-2. 중복된 이름의 오브젝트를 Collection로 담는것도 지원 (GetComponent, GetComponentInChidlren)
+
+GameObject의 이름을 기반으로 찾습니다.
+- Array와 List만 지원합니다.
+
+```csharp
+public enum ETestChildObject
+{
+  TestObject_Other_FindString,
+  TestObject_Other_FindEnum,
+}
+
+[GetComponent] // 해당 게임오브젝트에 같은 컴포넌트가 있는 경우 여러개가 담김
+public List<Transform> p_listTest = new List<Transform>();
+
+[GetComponentInChildren] // 인자에 Enum을 넣을 경우 오브젝트의 이름을 Enum으로 파싱하여 Enum을 그룹으로 할당.
+private Dictionary<ETestChildObject, List<Transform>> p_mapTest_KeyIsEnum = new Dictionary<ETestChildObject, List<Transform>>();
+
+[GetComponentInChildren] // 인자에 string을 넣을 경우 오브젝트의 이름을 그룹으로 할당.
+private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<string, Transform>();
+
 ```
 
 #### 3. 변수, 프로퍼티 구분없이 지원
