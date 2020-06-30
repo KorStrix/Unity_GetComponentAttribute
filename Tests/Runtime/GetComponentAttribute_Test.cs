@@ -68,7 +68,7 @@ namespace GetComponentAttribute_Test
 
         public void Awake()
         {
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(this);
+            GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this);
         }
 
         [Test]
@@ -223,7 +223,7 @@ namespace GetComponentAttribute_Test
 
 
             // Act (기능 실행)
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+            GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(pComponentTest);
 
 
 
@@ -266,7 +266,7 @@ namespace GetComponentAttribute_Test
 
 
             // Act (기능 실행)
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+            GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(pComponentTest);
 
 
 
@@ -319,7 +319,7 @@ namespace GetComponentAttribute_Test
 
 
             // Act (기능 실행)
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pComponentTest);
+            GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(pComponentTest);
 
 
 

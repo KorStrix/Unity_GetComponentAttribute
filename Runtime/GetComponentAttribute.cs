@@ -44,7 +44,7 @@ public class GetComponentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pMono, Type pElementType)
     {
-        return GetComponentAttributeHelper.Event_GetComponent(pMono, pElementType);
+        return GetComponentAttributeSetter.Event_GetComponent(pMono, pElementType);
     }
 }
 
@@ -52,7 +52,7 @@ public class GetComponentInParentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pMono, Type pElementType)
     {
-        return GetComponentAttributeHelper.Event_GetComponentInParents(pMono, pElementType);
+        return GetComponentAttributeSetter.Event_GetComponentInParents(pMono, pElementType);
     }
 }
 
@@ -112,13 +112,13 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase, IGetCo
 
     public override object GetComponent(MonoBehaviour pMono, Type pElementType)
     {
-        return GetComponentAttributeHelper.Event_GetComponentInChildren(pMono, pElementType, bInclude_OnDisable, bSearch_By_ComponentName, strComponentName);
+        return GetComponentAttributeSetter.Event_GetComponentInChildren(pMono, pElementType, bInclude_OnDisable, bSearch_By_ComponentName, strComponentName);
     }
 }
 
 
 
-public static class GetComponentAttributeHelper
+public static class GetComponentAttributeSetter
 {
     public static UnityEngine.Object[] ExtractSameNameArray(string strObjectName, UnityEngine.Object[] arrComponentFind)
     {
@@ -182,21 +182,22 @@ public static class GetComponentAttributeHelper
 
     public static object Event_GetComponentInChildren(MonoBehaviour pMono, Type pElementType, bool bInclude_DeActive, bool bSearch_By_ComponentName, string strComponentName)
     {
-        bool bTypeIsGameObject;
-        object pObjectReturn;
-	MethodInfo pGetMethod = typeof(MonoBehaviour).GetMethod("GetComponentsInChildren", new[] { typeof(bool) });
+        MethodInfo pGetMethod = typeof(MonoBehaviour).GetMethod("GetComponentsInChildren", new[] { typeof(bool) });
 
         if (pElementType.HasElementType)
-	    pElementType = pElementType.GetElementType();
+	        pElementType = pElementType.GetElementType();
 
-        if(pElementType == typeof(GameObject))
+        object pObjectReturn;
+        if (pElementType == typeof(GameObject))
         {
             pElementType = typeof(Transform);
+            // ReSharper disable once PossibleNullReferenceException
             pGetMethod = pGetMethod.MakeGenericMethod(pElementType);
-            pObjectReturn = Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pMono, new object[] { bInclude_DeActive }))
+            pObjectReturn = Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pMono, new object[] {bInclude_DeActive}));
         }
         else
         {
+            // ReSharper disable once PossibleNullReferenceException
             pGetMethod = pGetMethod.MakeGenericMethod(pElementType);
             pObjectReturn = pGetMethod.Invoke(pMono, new object[] { bInclude_DeActive });
         }

@@ -76,7 +76,7 @@ namespace GetComponentAttribute_Test
 
             // 자식을 전부 추가한 뒤에 페런츠에 추가한다.
             GetComponentAttribute_PerformanceTest pParents = pObjectParents.AddComponent<GetComponentAttribute_PerformanceTest>();
-            GetComponentAttributeHelper.DoUpdate_GetComponentAttribute(pParents);
+            GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(pParents);
 
             Check_Dictionary(pParents.p_mapTest_KeyIsEnum, iChildCount);
             Check_Dictionary(pParents.p_mapTransform_KeyIsEnum, iChildCount);
