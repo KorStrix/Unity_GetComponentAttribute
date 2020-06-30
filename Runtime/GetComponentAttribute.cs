@@ -185,7 +185,7 @@ public static class GetComponentAttributeSetter
 
     public static object Event_GetComponentInChildren(MonoBehaviour pMono, Type pElementType, bool bInclude_DeActive, bool bSearch_By_ComponentName, string strComponentName)
     {
-	    MethodInfo pGetMethod = typeof(MonoBehaviour).GetMethod("GetComponentsInChildren", new[] { typeof(bool) });
+        MethodInfo pGetMethod = typeof(MonoBehaviour).GetMethod("GetComponentsInChildren", new[] { typeof(bool) }).MakeGenericMethod(pElementType);
 
         if (pElementType.HasElementType)
 	        pElementType = pElementType.GetElementType();
@@ -207,6 +207,7 @@ public static class GetComponentAttributeSetter
 	 
         if (bSearch_By_ComponentName)
             return ExtractSameNameArray(strComponentName, pObjectReturn as UnityEngine.Object[]);
+
         return pObjectReturn;
     }
 
@@ -237,38 +238,38 @@ public static class GetComponentAttributeSetter
         if (pMemberType.IsGenericType)
         {
             pMemberInfo.SetValue_Extension(pMemberOwner, pComponent);
+            return pComponent;
+        }
+
+
+        if (pMemberType.HasElementType == false)
+        {
+            if (pComponent is Array arrComponent)
+                pMemberInfo.SetValue_Extension(pMemberOwner, arrComponent.Length != 0 ? arrComponent.GetValue(0) : null);
         }
         else
         {
-            if (pMemberType.HasElementType == false)
+            if (pComponent is Array arrComponent)
             {
-                if (pComponent is Array arrComponent)
-                    pMemberInfo.SetValue_Extension(pMemberOwner, arrComponent.Length != 0 ? arrComponent.GetValue(0) : null);
-            }
-            else
-            {
-                if (pComponent is Array arrComponent)
+                if (pMemberType.GetElementType() == typeof(GameObject))
                 {
-                    if (pMemberType.GetElementType() == typeof(GameObject))
-                    {
-                        pMemberInfo.SetValue_Extension(pMemberOwner, arrComponent.Cast<GameObject>().ToArray());
-                    }
-                    else
-                    {
-                        // Object[]를 Type[]로 NoneGeneric하게 바꿔야함..;
-                        Array ConvertedArray = Array.CreateInstance(pMemberType.GetElementType(), arrComponent.Length);
-                        Array.Copy(arrComponent, ConvertedArray, arrComponent.Length);
-
-                        pMemberInfo.SetValue_Extension(pMemberOwner, ConvertedArray);
-                    }
+                    pMemberInfo.SetValue_Extension(pMemberOwner, arrComponent.Cast<GameObject>().ToArray());
                 }
                 else
                 {
-                    if (pMemberType == typeof(GameObject))
-                        pMemberInfo.SetValue_Extension(pMemberOwner, ((Component)pComponent).gameObject);
-                    else
-                        pMemberInfo.SetValue_Extension(pMemberOwner, pComponent);
+                    // Object[]를 Type[]로 NoneGeneric하게 바꿔야함..;
+                    Array ConvertedArray = Array.CreateInstance(pMemberType.GetElementType(), arrComponent.Length);
+                    Array.Copy(arrComponent, ConvertedArray, arrComponent.Length);
+
+                    pMemberInfo.SetValue_Extension(pMemberOwner, ConvertedArray);
                 }
+            }
+            else
+            {
+                if (pMemberType == typeof(GameObject))
+                    pMemberInfo.SetValue_Extension(pMemberOwner, ((Component)pComponent).gameObject);
+                else
+                    pMemberInfo.SetValue_Extension(pMemberOwner, pComponent);
             }
         }
 
