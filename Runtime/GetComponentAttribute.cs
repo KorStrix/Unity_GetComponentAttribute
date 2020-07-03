@@ -357,9 +357,9 @@ public static class GetComponentAttributeSetter
                                 pType_DictionaryKey, pType_DictionaryValue });
 
         Object pInstanceDictionary = Activator.CreateInstance(pMemberType);
-        if (bValue_Is_Collection)
+        if (pType_DictionaryKey == typeof(string))
         {
-            if (pType_DictionaryKey == typeof(string))
+            if (bValue_Is_Collection)
             {
                 arrChildrenComponent.OfType<UnityEngine.Object>().
                     GroupBy(p => p.name).
@@ -367,10 +367,19 @@ public static class GetComponentAttributeSetter
                     ForEach(pGroup => 
                     AddDictionary_OnValueIsCollection(pMono, pType_DictionaryValue, pGroup, pTypeChild_OnValueIsCollection, Method_Add, pInstanceDictionary, (key) => key));
             }
-            else if (pType_DictionaryKey.IsEnum)
-            {
-                HashSet<string> setEnumName = new HashSet<string>(Enum.GetNames(pType_DictionaryKey));
+            else
+            {		
+                arrChildrenComponent.OfType<UnityEngine.Object>().
+                    ToList().
+                    ForEach(pUnityObject => AddDictionary(pMono, Method_Add, pInstanceDictionary, pUnityObject, (key) => key));
+            }
+        }
+        else if (pType_DictionaryKey.IsEnum)
+        {
+            HashSet<string> setEnumName = new HashSet<string>(Enum.GetNames(pType_DictionaryKey));
 
+            if (bValue_Is_Collection)
+            {     
                 arrChildrenComponent.OfType<UnityEngine.Object>().
                     GroupBy(p => p.name).
                     Where(p => setEnumName.Contains(p.Key)).
@@ -378,25 +387,15 @@ public static class GetComponentAttributeSetter
                     ForEach(pGroup =>
                     AddDictionary_OnValueIsCollection(pMono, pType_DictionaryValue, pGroup, pTypeChild_OnValueIsCollection, Method_Add, pInstanceDictionary, (key) => Enum.Parse(pType_DictionaryKey, key, true)));
             }
-        }
-        else
-        {
-            if (pType_DictionaryKey == typeof(string))
+            else
             {
-                arrChildrenComponent.OfType<UnityEngine.Object>().
-                    ToList().
-                    ForEach(pUnityObject => AddDictionary(pMono, Method_Add, pInstanceDictionary, pUnityObject, (key) => key));
-            }
-            else if (pType_DictionaryKey.IsEnum)
-            {
-                HashSet<string> setEnumName = new HashSet<string>(Enum.GetNames(pType_DictionaryKey));
-
                 arrChildrenComponent.OfType<UnityEngine.Object>().
                     Where(p => setEnumName.Contains(p.name)).
                     ToList().
                     ForEach(pUnityObject => AddDictionary(pMono, Method_Add, pInstanceDictionary, pUnityObject, (key) => Enum.Parse(pType_DictionaryKey, pUnityObject.name, true)));
             }
         }
+
 
         return pInstanceDictionary;
     }
