@@ -105,11 +105,11 @@ public enum ETestChildObject
 
 // Attribute 매개변수로 nameof연산자를 통해 string이 들어간 경우입니다.
 [GetComponentInChildren(nameof(ETestChildObject.TestObject_Other_FindString))]
-private Transform p_pChildComponent_FindString = null;
+private Transform pChildComponent_FindString = null;
 
 // Attribute 매개변수로 Enum이 들어간 경우입니다.
 [GetComponentInChildren(ETestChildObject.TestObject_Other_FindEnum)]
-private Transform p_pChildComponent_FindEnum = null;
+private Transform pChildComponent_FindEnum = null;
 ```
 
 #### 2-1. Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
@@ -118,13 +118,13 @@ GameObject의 이름을 기반으로 찾습니다.
 
 ```csharp
 [GetComponentInChildren]
-public List<Transform> p_listTest = new List<Transform>();
+public List<Transform> listTest = new List<Transform>();
 
 [GetComponentInChildren] // 인자에 Enum을 넣을 경우 오브젝트의 이름을 Enum으로 파싱하여 할당.
-private Dictionary<ETestChildObject, Transform> p_mapTest_KeyIsEnum = new Dictionary<ETestChildObject, Transform>();
+private Dictionary<ETestChildObject, Transform> mapTest_KeyIsEnum = new Dictionary<ETestChildObject, Transform>();
 
 [GetComponentInChildren] // 인자에 string을 넣을 경우 오브젝트의 이름을 할당.
-private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<string, Transform>();
+private Dictionary<string, Transform> mapTest_KeyIsString = new Dictionary<string, Transform>();
 
 [SerializeField]
 [GetComponentInChildren] // Array의 경우 null을 대입해도 정상 동작
@@ -142,13 +142,13 @@ public enum ETestChildObject
 }
 
 [GetComponent] // 해당 게임오브젝트에 같은 컴포넌트가 있는 경우 여러개가 담김
-public List<Transform> p_listTest = new List<Transform>();
+public List<Transform> listTest = new List<Transform>();
 
 [GetComponentInChildren] // 인자에 Enum을 넣을 경우 오브젝트의 이름을 Enum으로 파싱하여 Enum을 그룹으로 할당.
-private Dictionary<ETestChildObject, List<Transform>> p_mapTest_KeyIsEnum = new Dictionary<ETestChildObject, List<Transform>>();
+private Dictionary<ETestChildObject, List<Transform>> mapTest_KeyIsEnum = new Dictionary<ETestChildObject, List<Transform>>();
 
 [GetComponentInChildren] // 인자에 string을 넣을 경우 오브젝트의 이름을 그룹으로 할당.
-private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<string, Transform>();
+private Dictionary<string, Transform> mapTest_KeyIsString = new Dictionary<string, Transform>();
 
 ```
 
@@ -157,7 +157,7 @@ private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<str
 
 ```csharp
 [GetComponentInChildren]
-public Transform p_pChildComponent_FindEnumProperty { get; private set; }
+public Transform pChildComponent_FindEnumProperty { get; private set; }
 ```
 
 ### 4. Monobehaviour를 상속받지 않은 클래스도 지원
