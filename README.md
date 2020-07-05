@@ -192,16 +192,11 @@ public class GetComponentAttribute_Example : MonoBehaviour
 ### 1. GetComponentAttribute.cs의 내용을 복사하여 설치할 프로젝트에 생성
 - 링크 https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Runtime/GetComponentAttribute.cs
 
-### 2. Package로 받기
+### 2. Package로 받기 (유니티 2018버전 이상)
 - 설치할 유니티 프로젝트 - Packages - manifest.json 파일을 TextEditor로 열어 최하단에 쉼표 및 하단 내용 추가
 ```
 "com.korstrix.getcomponentattribute":"https://github.com/KorStrix/Unity_GetComponentAttribute.git"
 ```
-
-#### 주의사항
-유니티 `2017 ~ 2018버젼까지 동작 확인`하였으며,
-**유니티 5버젼 이하는 Assembly Definition을 지원하지 않아 정상동작하지 않을 수 있습니다.**
-Test 코드로 인하여 ``Assembly Defintion``을 사용했습니다.
 
 <br>
 
