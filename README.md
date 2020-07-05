@@ -1,3 +1,7 @@
+![UnityVersion badge](https://img.shields.io/badge/Unity-5.6%2B-red)
+![Platform badge](https://img.shields.io/badge/platform-Standalone%20%7C%20Android%20%7C%20IOS-green)
+[![License badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/LICENSE)
+
 # 개요
 
 유니티에서 자주 사용되는 **GetComponent, GetComponentInParents, GetComponentInChildren 등을**
@@ -203,7 +207,7 @@ Test 코드로 인하여 ``Assembly Defintion``을 사용했습니다.
 
 # 그 외
 
-### 참고한 프로젝트 - 
+### 참고한 프로젝트
 - [Unity3D 자동 GetComponent 블로그 링크](https://openlevel.postype.com/post/683269)
 
 ### 연락처
