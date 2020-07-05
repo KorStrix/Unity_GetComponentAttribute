@@ -1,7 +1,3 @@
-![Unity Version][unity-badge]&nbsp;
-[![Platform][platform-badge]][repo]&nbsp;
-[![GitHub license][license-badge]][license]&nbsp;
-
 # 개요
 
 유니티에서 자주 사용되는 **GetComponent, GetComponentInParents, GetComponentInChildren 등을**
