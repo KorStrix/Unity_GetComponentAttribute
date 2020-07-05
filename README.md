@@ -91,7 +91,7 @@ private Transform pTransform2 = null; // 컴파일러가 경고를 출력하지 
 
 # 기능들
 
-### 1. 유니티가 지원하는 GetComponent, GetComponents, GetComponenInParents, GetComponentInChildren, GetComponentsInChildren 등을 지원
+### 1. 유니티에서 자주 사용하는 함수 GetComponent(s), GetComponenInParents, GetComponent(s)InChildren 등을 지원
 
 ### 2. GetComponentInChildren Attribute
 - 하위 오브젝트에 **같은 타입의 오브젝트가 여러개 있을 경우, 이름으로 찾아서 할당하는 기능**
