@@ -188,6 +188,7 @@ public class GetComponentAttribute_Example : MonoBehaviour
 
 
 ## 설치 및 사용 방법
+1번 혹은 2번 방법 중 하나만 선택하여 설치
 
 ### 1. GetComponentAttribute.cs의 내용을 복사하여 설치할 프로젝트에 생성
 - 링크 https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Runtime/GetComponentAttribute.cs
