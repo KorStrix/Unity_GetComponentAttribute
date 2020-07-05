@@ -1,3 +1,7 @@
+![UnityVersion badge](https://img.shields.io/badge/Unity-5.6%2B-red)
+![Platform badge](https://img.shields.io/badge/platform-Standalone%20%7C%20Android%20%7C%20IOS-green)
+[![License badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/LICENSE)
+
 # 개요
 
 유니티에서 자주 사용되는 **GetComponent, GetComponentInParents, GetComponentInChildren 등을**
@@ -39,7 +43,6 @@ private void Awake()
 private GameObject FindChildObject(string strObjectName)
 {
   Transform[] arrAllChildObject = GetComponentsInChildren<Transform>();
-  // 포문으로 돌리며 이름으로 찾아서 리턴하는 로직
 }
 ```
 
@@ -55,31 +58,22 @@ public Rigidbody pProperty { get; private set; }
 void Awake()
 {
   // 아래 코드 한줄로 모든 GetComponentAttribute의 필드 혹은 Property가 할당됩니다.
-  SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
+  GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this);
 }
 ```
 
 <br>
 
-# 주의사항
-
-### 설치 주의사항
-유니티 `2017 ~ 2018버젼까지 동작 확인`하였으며,
-
-**유니티 5버젼 이하는 Assembly Definition을 지원하지 않아 정상동작하지 않을 수 있습니다.**
-
-Test 코드로 인하여 ``Assembly Defintion``을 사용했습니다.
-
-### 사용 주의사항
+# 사용 주의사항
 - Awake시 다음과 같이 Manager의 함수를 호출해야 합니다.
 
 ```csharp
 private void Awake()
 {
     // 모노비헤비어를 상속받은 클래스에서 사용하고 싶을 때
-    SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
+    GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this);
     // 모노비헤비어를 상속받지 않은 클래스에서 사용하고 싶을 때
-    SCManagerGetComponent.DoUpdateGetComponentAttribute(this, p_pNotInherit_Mono);
+    GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this, p_pNotInherit_Mono);
 }
 ```
 
@@ -97,7 +91,7 @@ private Transform pTransform2 = null; // 컴파일러가 경고를 출력하지 
 
 # 기능들
 
-### 1. 유니티가 지원하는 GetComponent, GetComponents, GetComponenInParents, GetComponentInChildren, GetComponentsInChildren 등을 지원
+### 1. 유니티에서 자주 사용하는 함수 GetComponent(s), GetComponenInParents, GetComponent(s)InChildren 등을 지원
 
 ### 2. GetComponentInChildren Attribute
 - 하위 오브젝트에 **같은 타입의 오브젝트가 여러개 있을 경우, 이름으로 찾아서 할당하는 기능**
@@ -111,11 +105,11 @@ public enum ETestChildObject
 
 // Attribute 매개변수로 nameof연산자를 통해 string이 들어간 경우입니다.
 [GetComponentInChildren(nameof(ETestChildObject.TestObject_Other_FindString))]
-private Transform p_pChildComponent_FindString = null;
+private Transform pChildComponent_FindString = null;
 
 // Attribute 매개변수로 Enum이 들어간 경우입니다.
 [GetComponentInChildren(ETestChildObject.TestObject_Other_FindEnum)]
-private Transform p_pChildComponent_FindEnum = null;
+private Transform pChildComponent_FindEnum = null;
 ```
 
 #### 2-1. Array, List, Dictionary 변수 자동 할당 지원 **(Array를 제외한 Collection의 경우 new를 할당해야 합니다.)**
@@ -124,13 +118,13 @@ GameObject의 이름을 기반으로 찾습니다.
 
 ```csharp
 [GetComponentInChildren]
-public List<Transform> p_listTest = new List<Transform>();
+public List<Transform> listTest = new List<Transform>();
 
 [GetComponentInChildren] // 인자에 Enum을 넣을 경우 오브젝트의 이름을 Enum으로 파싱하여 할당.
-private Dictionary<ETestChildObject, Transform> p_mapTest_KeyIsEnum = new Dictionary<ETestChildObject, Transform>();
+private Dictionary<ETestChildObject, Transform> mapTest_KeyIsEnum = new Dictionary<ETestChildObject, Transform>();
 
 [GetComponentInChildren] // 인자에 string을 넣을 경우 오브젝트의 이름을 할당.
-private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<string, Transform>();
+private Dictionary<string, Transform> mapTest_KeyIsString = new Dictionary<string, Transform>();
 
 [SerializeField]
 [GetComponentInChildren] // Array의 경우 null을 대입해도 정상 동작
@@ -148,13 +142,13 @@ public enum ETestChildObject
 }
 
 [GetComponent] // 해당 게임오브젝트에 같은 컴포넌트가 있는 경우 여러개가 담김
-public List<Transform> p_listTest = new List<Transform>();
+public List<Transform> listTest = new List<Transform>();
 
 [GetComponentInChildren] // 인자에 Enum을 넣을 경우 오브젝트의 이름을 Enum으로 파싱하여 Enum을 그룹으로 할당.
-private Dictionary<ETestChildObject, List<Transform>> p_mapTest_KeyIsEnum = new Dictionary<ETestChildObject, List<Transform>>();
+private Dictionary<ETestChildObject, List<Transform>> mapTest_KeyIsEnum = new Dictionary<ETestChildObject, List<Transform>>();
 
 [GetComponentInChildren] // 인자에 string을 넣을 경우 오브젝트의 이름을 그룹으로 할당.
-private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<string, Transform>();
+private Dictionary<string, Transform> mapTest_KeyIsString = new Dictionary<string, Transform>();
 
 ```
 
@@ -163,7 +157,7 @@ private Dictionary<string, Transform> p_mapTest_KeyIsString = new Dictionary<str
 
 ```csharp
 [GetComponentInChildren]
-public Transform p_pChildComponent_FindEnumProperty { get; private set; }
+public Transform pChildComponent_FindEnumProperty { get; private set; }
 ```
 
 ### 4. Monobehaviour를 상속받지 않은 클래스도 지원
@@ -185,16 +179,31 @@ public class GetComponentAttribute_Example : MonoBehaviour
   private void Awake()
   {
       // 모노비헤비어를 상속받지 않은 클래스에서 사용하고 싶을 때
-      SCManagerGetComponent.DoUpdateGetComponentAttribute(this, p_pNotInherit_Mono);
+      GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this, p_pNotInherit_Mono);
   }
 }
 ```
 
 <br>
 
+
+## 설치 및 사용 방법
+1번 혹은 2번 방법 중 하나만 선택하여 설치
+
+### 1. GetComponentAttribute.cs의 내용을 복사하여 설치할 프로젝트에 생성
+- 링크 https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Runtime/GetComponentAttribute.cs
+
+### 2. Package로 받기 (유니티 2018버전 이상)
+- 설치할 유니티 프로젝트 - Packages - manifest.json 파일을 TextEditor로 열어 최하단에 쉼표 및 하단 내용 추가
+```
+"com.korstrix.getcomponentattribute":"https://github.com/KorStrix/Unity_GetComponentAttribute.git"
+```
+
+<br>
+
 # 그 외
 
-### 참고한 프로젝트 - 
+### 참고한 프로젝트
 - [Unity3D 자동 GetComponent 블로그 링크](https://openlevel.postype.com/post/683269)
 
 ### 연락처
