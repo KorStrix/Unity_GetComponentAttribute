@@ -1,0 +1,205 @@
+#region Header
+/*	============================================
+ *	Author 			    	: Strix
+ *	Initial Creation Date 	: 2020-07-05
+ *	Summary 		        : 
+ *  Template 		        : New Behaviour For Unity Editor V2
+   ============================================ */
+#endregion Header
+
+using System;
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using UnityEngine.UI;
+
+public interface IUIActionAttribute
+{
+    string strUIElementName { get; }
+}
+
+/// <summary>
+/// <see cref="Button"/>이 클릭되었을 경우 해당 함수를 자동으로 호출합니다.
+/// <para>인자가 0개, 1개일 수 있으며,</para>
+/// <para>인자가 1개면 <see cref="Button"/>타입의 인자 1개만 허용됩니다.</para>
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class UIToggleCallAttribute : PropertyAttribute, IUIActionAttribute
+{
+    public string strUIElementName => strToggleName;
+
+    public string strToggleName { get; private set; } = "";
+    public bool bPrint_OnError { get; private set; } = true;
+
+    public UIToggleCallAttribute(string strToggleName, bool bPrint_OnError = true)
+    {
+        this.strToggleName = strToggleName;
+        this.bPrint_OnError = bPrint_OnError;
+    }
+
+    public UIToggleCallAttribute(object pObject, bool bPrint_OnError = true)
+    {
+        strToggleName = pObject.ToString();
+        this.bPrint_OnError = bPrint_OnError;
+    }
+}
+
+/// <summary>
+/// <see cref="Button"/>이 클릭되었을 경우 해당 함수를 자동으로 호출합니다.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class UIButtonCallAttribute : PropertyAttribute, IUIActionAttribute
+{
+    public string strUIElementName => strButtonName;
+
+    public string strButtonName { get; private set; } = "";
+    public bool bPrint_OnError { get; private set; } = true;
+
+    public UIButtonCallAttribute(string strButtonName, bool bPrint_OnError = true)
+    {
+        this.strButtonName = strButtonName;
+        this.bPrint_OnError = bPrint_OnError;
+    }
+
+    public UIButtonCallAttribute(object pObject, bool bPrint_OnError = true)
+    {
+        strButtonName = pObject.ToString();
+        this.bPrint_OnError = bPrint_OnError;
+    }
+}
+
+
+public static class UIActionAttributeSetter
+{
+    public static void DoSet_UIActionAttribute(MonoBehaviour pMono) => DoSet_UIActionAttribute(pMono, pMono);
+
+    public static void DoSet_UIActionAttribute(MonoBehaviour pMono, object pClass_Anything)
+    {
+        // BindingFlags를 일일이 써야 잘 동작한다..
+        Type pType = pClass_Anything.GetType();
+        List<MethodInfo> listMembers = new List<MethodInfo>(pType.GetMethods(BindingFlags.Public | BindingFlags.Instance));
+        listMembers.AddRange(pType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance));
+
+        var arrMembers_Filtered = listMembers.Where(p => p.GetCustomAttributes().Any());
+        foreach (var pMember in arrMembers_Filtered)
+            DoSet_UIActionAttribute(pMono, pClass_Anything, pMember);
+    }
+
+    public static void DoSet_UIActionAttribute(MonoBehaviour pTargetMono, object pMemberOwner, MethodInfo pMethodInfo)
+    {
+        if (pMethodInfo == null)
+            return;
+
+
+        IUIActionAttribute[] arrCustomAttributes = pMethodInfo.GetCustomAttributes(true).
+            OfType<IUIActionAttribute>().
+            ToArray();
+        if (arrCustomAttributes.Length == 0)
+            return;
+
+        Init_ButtonCallAttribute(pTargetMono, pMethodInfo, arrCustomAttributes.OfType<UIButtonCallAttribute>().ToArray());
+        Init_ToggleCallAttribute(pTargetMono, pMethodInfo, arrCustomAttributes.OfType<UIToggleCallAttribute>().ToArray());
+    }
+
+    private static void Init_ToggleCallAttribute(MonoBehaviour pTargetMono, MethodInfo pMethodInfo, UIToggleCallAttribute[] arrCustomAttributes)
+    {
+        if (arrCustomAttributes.Length == 0)
+            return;
+
+        Toggle[] arrHasToggles = GetComponentsInChildren_ComponentArray<Toggle>(pTargetMono);
+        if (arrHasToggles.Length == 0)
+        {
+            Debug.LogError($"{nameof(UIToggleCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Not has Toggle in Children Object", pTargetMono);
+            return;
+        }
+
+
+        foreach (UIToggleCallAttribute pAttribute in arrCustomAttributes)
+        {
+            Toggle[] arrEqualNameComponent = arrHasToggles.Where(p => p.name.Equals(pAttribute.strUIElementName)).ToArray();
+            if (arrEqualNameComponent.Any() == false)
+            {
+                Debug.LogError($"{nameof(UIToggleCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Not has Match Name({pAttribute.strUIElementName}) Toggle in Children Object", pTargetMono);
+                continue;
+            }
+
+
+            bool bIsWrongParameter = false;
+            ParameterInfo[] arrParam = pMethodInfo.GetParameters();
+            if (arrParam.Length == 1)
+            {
+                foreach (var pToggle in arrEqualNameComponent)
+                    pToggle.onValueChanged.AddListener((bToggle) => pMethodInfo.Invoke(pTargetMono, new object[] { bToggle }));
+            }
+            else if (arrParam.Length == 2) // 인자가 2개면 인풋값과 함께 인스턴스를 보내기로
+            {
+                if (arrParam[0].ParameterType == typeof(bool) && arrParam[1].ParameterType == typeof(Toggle))
+                {
+                    foreach (var pToggle in arrEqualNameComponent)
+                        pToggle.onValueChanged.AddListener((bToggle) => pMethodInfo.Invoke(pTargetMono, new object[] {bToggle, pToggle}));
+                }
+                else if (arrParam[0].ParameterType == typeof(Toggle) && arrParam[1].ParameterType == typeof(bool))
+                {
+                    foreach (var pToggle in arrEqualNameComponent)
+                        pToggle.onValueChanged.AddListener((bToggle) => pMethodInfo.Invoke(pTargetMono, new object[] {pToggle, bToggle}));
+                }
+                else
+                    bIsWrongParameter = true;
+            }
+            else
+                bIsWrongParameter = true;
+
+            if (bIsWrongParameter)
+                Debug.LogError($"{nameof(UIToggleCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Wrong Parameter. support parameter type is (bool) or (bool, Toggle) or (Toggle, bool)", pTargetMono);
+        }
+    }
+
+    private static void Init_ButtonCallAttribute(MonoBehaviour pTargetMono, MethodInfo pMethodInfo, UIButtonCallAttribute[] arrCustomAttributes)
+    {
+        if (arrCustomAttributes.Length == 0)
+            return;
+
+        Button[] arrHasButtons = GetComponentsInChildren_ComponentArray<Button>(pTargetMono);
+        if (arrHasButtons.Length == 0)
+        {
+            Debug.LogError($"{nameof(UIButtonCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Not has Button in Children Object", pTargetMono);
+            return;
+        }
+
+
+        foreach (UIButtonCallAttribute pAttribute in arrCustomAttributes)
+        {
+            Button[] arrEqualNameComponent = arrHasButtons.Where(p => p.name.Equals(pAttribute.strUIElementName)).ToArray();
+            if (arrEqualNameComponent.Any() == false)
+            {
+                Debug.LogError($"{nameof(UIButtonCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Not has Match Name({pAttribute.strUIElementName}) Button in Children Object", pTargetMono);
+                continue;
+            }
+
+
+            ParameterInfo[] arrParam = pMethodInfo.GetParameters();
+            if (arrParam.Length == 0)
+            {
+                foreach (var pButton in arrEqualNameComponent)
+                    pButton.onClick.AddListener(() => pMethodInfo.Invoke(pTargetMono, null));
+            }
+            else if (arrParam.Length == 1 && arrParam[0].ParameterType == typeof(Button)) // 일단 인자가 1개면 버튼 인스턴스를 보내기로
+            {
+                foreach (var pButton in arrEqualNameComponent)
+                    pButton.onClick.AddListener(() => pMethodInfo.Invoke(pTargetMono, new object[] { pButton }));
+            }
+            else
+                Debug.LogError($"{nameof(UIButtonCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Wrong Parameter. support parameter type is () or (Button)", pTargetMono);
+        }
+    }
+
+    static T[] GetComponentsInChildren_ComponentArray<T>(MonoBehaviour pTarget)
+        where T : Component
+    {
+        return pTarget.transform.GetComponentsInChildren(typeof(T), true).
+            OfType<T>().
+            ToArray();
+    }
+}
