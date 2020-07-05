@@ -1,3 +1,7 @@
+![Unity Version][unity-badge]&nbsp;
+[![Platform][platform-badge]][repo]&nbsp;
+[![GitHub license][license-badge]][license]&nbsp;
+
 # 개요
 
 유니티에서 자주 사용되는 **GetComponent, GetComponentInParents, GetComponentInChildren 등을**
@@ -39,7 +43,6 @@ private void Awake()
 private GameObject FindChildObject(string strObjectName)
 {
   Transform[] arrAllChildObject = GetComponentsInChildren<Transform>();
-  // 포문으로 돌리며 이름으로 찾아서 리턴하는 로직
 }
 ```
 
@@ -55,31 +58,22 @@ public Rigidbody pProperty { get; private set; }
 void Awake()
 {
   // 아래 코드 한줄로 모든 GetComponentAttribute의 필드 혹은 Property가 할당됩니다.
-  SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
+  GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this);
 }
 ```
 
 <br>
 
-# 주의사항
-
-### 설치 주의사항
-유니티 `2017 ~ 2018버젼까지 동작 확인`하였으며,
-
-**유니티 5버젼 이하는 Assembly Definition을 지원하지 않아 정상동작하지 않을 수 있습니다.**
-
-Test 코드로 인하여 ``Assembly Defintion``을 사용했습니다.
-
-### 사용 주의사항
+# 사용 주의사항
 - Awake시 다음과 같이 Manager의 함수를 호출해야 합니다.
 
 ```csharp
 private void Awake()
 {
     // 모노비헤비어를 상속받은 클래스에서 사용하고 싶을 때
-    SCManagerGetComponent.DoUpdateGetComponentAttribute(this);
+    GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this);
     // 모노비헤비어를 상속받지 않은 클래스에서 사용하고 싶을 때
-    SCManagerGetComponent.DoUpdateGetComponentAttribute(this, p_pNotInherit_Mono);
+    GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this, p_pNotInherit_Mono);
 }
 ```
 
@@ -185,10 +179,29 @@ public class GetComponentAttribute_Example : MonoBehaviour
   private void Awake()
   {
       // 모노비헤비어를 상속받지 않은 클래스에서 사용하고 싶을 때
-      SCManagerGetComponent.DoUpdateGetComponentAttribute(this, p_pNotInherit_Mono);
+      GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(this, p_pNotInherit_Mono);
   }
 }
 ```
+
+<br>
+
+
+## 설치 및 사용 방법
+
+### 1. GetComponentAttribute.cs의 내용을 복사하여 설치할 프로젝트에 생성
+- 링크 https://github.com/KorStrix/Unity_GetComponentAttribute/blob/master/Runtime/GetComponentAttribute.cs
+
+### 2. Package로 받기
+- 설치할 유니티 프로젝트 - Packages - manifest.json 파일을 TextEditor로 열어 최하단에 쉼표 및 하단 내용 추가
+```
+"com.korstrix.getcomponentattribute":"https://github.com/KorStrix/Unity_GetComponentAttribute.git"
+```
+
+#### 주의사항
+유니티 `2017 ~ 2018버젼까지 동작 확인`하였으며,
+**유니티 5버젼 이하는 Assembly Definition을 지원하지 않아 정상동작하지 않을 수 있습니다.**
+Test 코드로 인하여 ``Assembly Defintion``을 사용했습니다.
 
 <br>
 
