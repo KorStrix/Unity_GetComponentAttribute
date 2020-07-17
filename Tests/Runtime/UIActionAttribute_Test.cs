@@ -34,19 +34,19 @@ namespace Tests
             }
 
             [UIButtonCall(EButtonName.Button_A)]
-            public void 버튼_A_콜_1()
+            public void CallButonA_1()
             {
                 iButton_A_ClickCount++;
             }
 
             [UIButtonCall(nameof(EButtonName.Button_A))]
-            public void 버튼_A_콜_2()
+            public void CallButonA_2()
             {
                 iButton_A_ClickCount++;
             }
 
             [UIButtonCall(EButtonName.Button_B)]
-            public void 버튼_B_콜(Button pButtonInstance)
+            public void CallButonB(Button pButtonInstance)
             {
                 pButtonClicked = pButtonInstance;
             }

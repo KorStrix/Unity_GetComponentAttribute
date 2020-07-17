@@ -9,11 +9,11 @@
 
 using System;
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine.UI;
+using Object = System.Object;
 
 public interface IUIActionAttribute
 {
@@ -30,16 +30,10 @@ public class UIToggleCallAttribute : PropertyAttribute, IUIActionAttribute
 {
     public string strUIElementName => strToggleName;
 
-    public string strToggleName { get; private set; } = "";
-    public bool bPrint_OnError { get; private set; } = true;
+    public string strToggleName { get; private set; }
+    public bool bPrint_OnError { get; private set; }
 
-    public UIToggleCallAttribute(string strToggleName, bool bPrint_OnError = true)
-    {
-        this.strToggleName = strToggleName;
-        this.bPrint_OnError = bPrint_OnError;
-    }
-
-    public UIToggleCallAttribute(object pObject, bool bPrint_OnError = true)
+    public UIToggleCallAttribute(Object pObject, bool bPrint_OnError = true)
     {
         strToggleName = pObject.ToString();
         this.bPrint_OnError = bPrint_OnError;
@@ -54,16 +48,10 @@ public class UIButtonCallAttribute : PropertyAttribute, IUIActionAttribute
 {
     public string strUIElementName => strButtonName;
 
-    public string strButtonName { get; private set; } = "";
-    public bool bPrint_OnError { get; private set; } = true;
+    public string strButtonName { get; private set; }
+    public bool bPrint_OnError { get; private set; }
 
-    public UIButtonCallAttribute(string strButtonName, bool bPrint_OnError = true)
-    {
-        this.strButtonName = strButtonName;
-        this.bPrint_OnError = bPrint_OnError;
-    }
-
-    public UIButtonCallAttribute(object pObject, bool bPrint_OnError = true)
+    public UIButtonCallAttribute(Object pObject, bool bPrint_OnError = true)
     {
         strButtonName = pObject.ToString();
         this.bPrint_OnError = bPrint_OnError;

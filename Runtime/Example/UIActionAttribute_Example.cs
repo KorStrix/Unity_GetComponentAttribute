@@ -35,12 +35,12 @@ public class UIActionAttribute_Example : MonoBehaviour
 
     /* public - [Do~Something] Function 	        */
 
-    [UIButtonCall(EButtonName.ButtonAttributeExample)]
-    public void ButtonAttributeTest(Button pButton)
-    {
-        Debug.Log(nameof(ButtonAttributeTest), this);
-        StartCoroutine(ButtonCoroutine(pButton));
-    }
+    //[UIButtonCall(EButtonName.ButtonAttributeExample)]
+    //public void ButtonAttributeTest(Button pButton)
+    //{
+    //    Debug.Log(nameof(ButtonAttributeTest), this);
+    //    StartCoroutine(ButtonCoroutine(pButton));
+    //}
 
     // ========================================================================== //
 
