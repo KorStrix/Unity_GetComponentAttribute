@@ -12,6 +12,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using Object = System.Object;
 
@@ -33,9 +34,9 @@ public class UIToggleCallAttribute : PropertyAttribute, IUIActionAttribute
     public string strToggleName { get; private set; }
     public bool bPrint_OnError { get; private set; }
 
-    public UIToggleCallAttribute(Object pObject, bool bPrint_OnError = true)
+    public UIToggleCallAttribute(Object ToggleName, bool bPrint_OnError = true)
     {
-        strToggleName = pObject.ToString();
+        strToggleName = ToggleName.ToString();
         this.bPrint_OnError = bPrint_OnError;
     }
 }
@@ -46,14 +47,15 @@ public class UIToggleCallAttribute : PropertyAttribute, IUIActionAttribute
 [AttributeUsage(AttributeTargets.Method)]
 public class UIButtonCallAttribute : PropertyAttribute, IUIActionAttribute
 {
+    public bool bIsInit = false;
     public string strUIElementName => strButtonName;
 
     public string strButtonName { get; private set; }
     public bool bPrint_OnError { get; private set; }
 
-    public UIButtonCallAttribute(Object pObject, bool bPrint_OnError = true)
+    public UIButtonCallAttribute(Object ButtonName, bool bPrint_OnError = true)
     {
-        strButtonName = pObject.ToString();
+        strButtonName = ButtonName.ToString();
         this.bPrint_OnError = bPrint_OnError;
     }
 }
@@ -65,6 +67,20 @@ public static class UIActionAttributeSetter
 
     public static void DoSet_UIActionAttribute(MonoBehaviour pMono, object pClass_Anything)
     {
+        if (pMono == null)
+        {
+            Debug.LogError($"{nameof(DoSet_UIActionAttribute)} - pMono == null");
+            return;
+        }
+
+        if (pClass_Anything == null)
+        {
+            Debug.LogError($"{nameof(DoSet_UIActionAttribute)} - pClass_Anything == null");
+            return;
+        }
+
+
+
         // BindingFlags를 일일이 써야 잘 동작한다..
         Type pType = pClass_Anything.GetType();
         List<MethodInfo> listMembers = new List<MethodInfo>(pType.GetMethods(BindingFlags.Public | BindingFlags.Instance));
@@ -80,18 +96,18 @@ public static class UIActionAttributeSetter
         if (pMethodInfo == null)
             return;
 
-
         IUIActionAttribute[] arrCustomAttributes = pMethodInfo.GetCustomAttributes(true).
             OfType<IUIActionAttribute>().
             ToArray();
         if (arrCustomAttributes.Length == 0)
             return;
 
-        Init_ButtonCallAttribute(pTargetMono, pMethodInfo, arrCustomAttributes.OfType<UIButtonCallAttribute>().ToArray());
-        Init_ToggleCallAttribute(pTargetMono, pMethodInfo, arrCustomAttributes.OfType<UIToggleCallAttribute>().ToArray());
+
+        Init_ButtonCallAttribute(pTargetMono, pMemberOwner, pMethodInfo, arrCustomAttributes.OfType<UIButtonCallAttribute>().ToArray());
+        Init_ToggleCallAttribute(pTargetMono, pMemberOwner, pMethodInfo, arrCustomAttributes.OfType<UIToggleCallAttribute>().ToArray());
     }
 
-    private static void Init_ToggleCallAttribute(MonoBehaviour pTargetMono, MethodInfo pMethodInfo, UIToggleCallAttribute[] arrCustomAttributes)
+    private static void Init_ToggleCallAttribute(MonoBehaviour pTargetMono, object pMemberOwner, MethodInfo pMethodInfo, UIToggleCallAttribute[] arrCustomAttributes)
     {
         if (arrCustomAttributes.Length == 0)
             return;
@@ -118,33 +134,44 @@ public static class UIActionAttributeSetter
             ParameterInfo[] arrParam = pMethodInfo.GetParameters();
             if (arrParam.Length == 1)
             {
+                // 중복체크를 위해 Delegate Instance 생성 (RemoveListener)
+                UnityAction<bool> pUnityAction = (UnityAction<bool>)pMethodInfo.CreateDelegate(typeof(UnityAction<bool>), pMemberOwner);
+
                 foreach (var pToggle in arrEqualNameComponent)
-                    pToggle.onValueChanged.AddListener((bToggle) => pMethodInfo.Invoke(pTargetMono, new object[] { bToggle }));
-            }
-            else if (arrParam.Length == 2) // 인자가 2개면 인풋값과 함께 인스턴스를 보내기로
-            {
-                if (arrParam[0].ParameterType == typeof(bool) && arrParam[1].ParameterType == typeof(Toggle))
                 {
-                    foreach (var pToggle in arrEqualNameComponent)
-                        pToggle.onValueChanged.AddListener((bToggle) => pMethodInfo.Invoke(pTargetMono, new object[] {bToggle, pToggle}));
+                    pToggle.onValueChanged.RemoveListener(pUnityAction);
+                    pToggle.onValueChanged.AddListener(pUnityAction);
                 }
-                else if (arrParam[0].ParameterType == typeof(Toggle) && arrParam[1].ParameterType == typeof(bool))
-                {
-                    foreach (var pToggle in arrEqualNameComponent)
-                        pToggle.onValueChanged.AddListener((bToggle) => pMethodInfo.Invoke(pTargetMono, new object[] {pToggle, bToggle}));
-                }
-                else
-                    bIsWrongParameter = true;
             }
+
+            // 인자가 있을 경우 onClick의 매개변수와 일치하지 않기때문에
+            // 어디에 이미 onClick에 등록했다는 정보를 저장하지 않는 이상
+            // 람다만으로는 onClick 중복체크가 불가능
+
+            //else if (arrParam.Length == 2) // 인자가 2개면 인풋값과 함께 인스턴스를 보내기로
+            //{
+            //    if (arrParam[0].ParameterType == typeof(bool) && arrParam[1].ParameterType == typeof(Toggle))
+            //    {
+            //        foreach (var pToggle in arrEqualNameComponent)
+            //            pToggle.onValueChanged.AddListener((bToggle) => pMethodInfo.Invoke(pMemberOwner, new object[] {bToggle, pToggle}));
+            //    }
+            //    else if (arrParam[0].ParameterType == typeof(Toggle) && arrParam[1].ParameterType == typeof(bool))
+            //    {
+            //        foreach (var pToggle in arrEqualNameComponent)
+            //            pToggle.onValueChanged.AddListener((bToggle) => pMethodInfo.Invoke(pMemberOwner, new object[] {pToggle, bToggle}));
+            //    }
+            //    else
+            //        bIsWrongParameter = true;
+            //}
             else
                 bIsWrongParameter = true;
 
             if (bIsWrongParameter)
-                Debug.LogError($"{nameof(UIToggleCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Wrong Parameter. support parameter type is (bool) or (bool, Toggle) or (Toggle, bool)", pTargetMono);
+                Debug.LogError($"{nameof(UIToggleCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Wrong Parameter. support parameter type is (bool)", pTargetMono);
         }
     }
 
-    private static void Init_ButtonCallAttribute(MonoBehaviour pTargetMono, MethodInfo pMethodInfo, UIButtonCallAttribute[] arrCustomAttributes)
+    private static void Init_ButtonCallAttribute(MonoBehaviour pTargetMono, object pMemberOwner, MethodInfo pMethodInfo, UIButtonCallAttribute[] arrCustomAttributes)
     {
         if (arrCustomAttributes.Length == 0)
             return;
@@ -170,16 +197,31 @@ public static class UIActionAttributeSetter
             ParameterInfo[] arrParam = pMethodInfo.GetParameters();
             if (arrParam.Length == 0)
             {
+                // 중복체크를 위해 Delegate Instance 생성 (RemoveListener)
+                UnityAction pUnityAction = (UnityAction)pMethodInfo.CreateDelegate(typeof(UnityAction), pMemberOwner);
+
                 foreach (var pButton in arrEqualNameComponent)
-                    pButton.onClick.AddListener(() => pMethodInfo.Invoke(pTargetMono, null));
+                {
+                    pButton.onClick.RemoveListener(pUnityAction);
+                    pButton.onClick.AddListener(pUnityAction);
+                }
             }
-            else if (arrParam.Length == 1 && arrParam[0].ParameterType == typeof(Button)) // 일단 인자가 1개면 버튼 인스턴스를 보내기로
-            {
-                foreach (var pButton in arrEqualNameComponent)
-                    pButton.onClick.AddListener(() => pMethodInfo.Invoke(pTargetMono, new object[] { pButton }));
-            }
+
+            // 인자가 있을 경우 onClick의 매개변수와 일치하지 않기때문에
+            // 어디에 이미 onClick에 등록했다는 정보를 저장하지 않는 이상
+            // 람다만으로는 onClick 중복체크가 불가능
+
+            //else if (arrParam.Length == 1 && arrParam[0].ParameterType == typeof(Button)) // 일단 인자가 1개면 버튼 인스턴스를 보내기로
+            //{
+            //    foreach (var pButton in arrEqualNameComponent)
+            //    {
+            //        pButton.onClick.AddListener(() => pMethodInfo.Invoke(pMemberOwner, new object[] { pButton }));
+            //    }
+            //}
             else
-                Debug.LogError($"{nameof(UIButtonCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Wrong Parameter. support parameter type is () or (Button)", pTargetMono);
+                Debug.LogError($"{nameof(UIButtonCallAttribute)} - {pTargetMono.name} - {pMethodInfo.Name} - Wrong Parameter. support parameter type is ()", pTargetMono);
+
+            pAttribute.bIsInit = true;
         }
     }
 
@@ -189,5 +231,16 @@ public static class UIActionAttributeSetter
         return pTarget.transform.GetComponentsInChildren(typeof(T), true).
             OfType<T>().
             ToArray();
+    }
+}
+
+public static class UnityEventExtension
+{
+    public static int GetListenerNumber(this UnityEventBase unityEvent)
+    {
+        var field = typeof(UnityEventBase).GetField("m_Calls", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+        var invokeCallList = field.GetValue(unityEvent);
+        var property = invokeCallList.GetType().GetProperty("Count");
+        return (int)property.GetValue(invokeCallList);
     }
 }

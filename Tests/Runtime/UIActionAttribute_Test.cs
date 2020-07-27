@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -24,31 +25,30 @@ namespace Tests
             }
 
             public int iButton_A_ClickCount { get; private set; }
-
-            public Button pButtonClicked { get; private set; }
+            public int iButton_B_ClickCount { get; private set; }
 
             public void Reset()
             {
                 iButton_A_ClickCount = 0;
-                pButtonClicked = null;
+                iButton_B_ClickCount = 0;
             }
 
             [UIButtonCall(EButtonName.Button_A)]
-            public void CallButonA_1()
+            public void CallButtonA_1()
             {
                 iButton_A_ClickCount++;
             }
 
             [UIButtonCall(nameof(EButtonName.Button_A))]
-            public void CallButonA_2()
+            public void CallButtonA_2()
             {
                 iButton_A_ClickCount++;
             }
 
             [UIButtonCall(EButtonName.Button_B)]
-            public void CallButonB(Button pButtonInstance)
+            public void CallButtonB()
             {
-                pButtonClicked = pButtonInstance;
+                iButton_B_ClickCount++;
             }
         }
 
@@ -79,29 +79,75 @@ namespace Tests
         }
 
 
+        //[Test]
+        //public void 인자가1개있는_버튼의_기능동작테스트()
+        //{
+        //    // Arrange (데이터 정렬)
+        //    GameObject pObjectTester = new GameObject(nameof(인자가1개있는_버튼의_기능동작테스트));
+        //    Button pButtonB = Create_ChildComponent<Button>(pObjectTester, HasUIButtonTester.EButtonName.Button_B.ToString());
+        //    Create_ChildComponent<Button>(pObjectTester, HasUIButtonTester.EButtonName.Button_A.ToString());
+
+        //    HasUIButtonTester pTester = pObjectTester.AddComponent<HasUIButtonTester>();
+        //    pTester.Reset();
+        //    Assert.IsNull(pTester.pButtonClicked);
+
+
+
+        //    // Act (실행)
+        //    UIActionAttributeSetter.DoSet_UIActionAttribute(pTester);
+        //    // 스크립트로 수동으로 버튼 B 클릭
+        //    pButtonB.OnPointerClick(_pPointerEventData);
+
+
+
+        //    // Assert(맞는지 체크)
+        //    Assert.AreEqual(pTester.pButtonClicked, pButtonB);
+        //}
+
+
         [Test]
-        public void 인자가1개있는_버튼의_기능동작테스트()
+        public void 이벤트_중복등록_테스트()
         {
             // Arrange (데이터 정렬)
-            GameObject pObjectTester = new GameObject(nameof(인자가1개있는_버튼의_기능동작테스트));
-            Button pButtonB = Create_ChildComponent<Button>(pObjectTester, HasUIButtonTester.EButtonName.Button_B.ToString());
-            Create_ChildComponent<Button>(pObjectTester, HasUIButtonTester.EButtonName.Button_A.ToString());
+            GameObject pObjectTester = new GameObject(nameof(이벤트_중복등록_테스트));
+            Button pButtonA = Create_ChildComponent<Button>(pObjectTester, HasUIButtonTester.EButtonName.Button_A.ToString());
+            Create_ChildComponent<Button>(pObjectTester, HasUIButtonTester.EButtonName.Button_B.ToString());
 
-            HasUIButtonTester pTester = pObjectTester.AddComponent<HasUIButtonTester>();
-            pTester.Reset();
-            Assert.IsNull(pTester.pButtonClicked);
 
+            HasUIButtonTester pPrefab = pObjectTester.AddComponent<HasUIButtonTester>();
+            pPrefab.Reset();
+            Assert.AreEqual(pPrefab.iButton_A_ClickCount, 0);
+
+
+
+            GameObject pObjectTester_Copy = GameObject.Instantiate(pObjectTester);
+            Button pButtonA_Copy = pObjectTester_Copy.GetComponentsInChildren<Button>().
+                FirstOrDefault(p => p.name.Equals(HasUIButtonTester.EButtonName.Button_A.ToString()));
+
+            Button pButtonB_Copy = pObjectTester_Copy.GetComponentsInChildren<Button>().
+                FirstOrDefault(p => p.name.Equals(HasUIButtonTester.EButtonName.Button_B.ToString()));
+
+            HasUIButtonTester pTester = pObjectTester_Copy.GetComponent<HasUIButtonTester>();
 
 
             // Act (실행)
-            UIActionAttributeSetter.DoSet_UIActionAttribute(pTester);
-            // 스크립트로 수동으로 버튼 B 클릭
-            pButtonB.OnPointerClick(_pPointerEventData);
+            UIActionAttributeSetter.DoSet_UIActionAttribute(pPrefab);
 
+            // 일부러 두번실행
+            UIActionAttributeSetter.DoSet_UIActionAttribute(pTester);
+            UIActionAttributeSetter.DoSet_UIActionAttribute(pTester);
+
+            // 스크립트로 수동으로 버튼 A 클릭
+            pButtonA_Copy.OnPointerClick(_pPointerEventData);
+            pButtonB_Copy.OnPointerClick(_pPointerEventData);
 
 
             // Assert(맞는지 체크)
-            Assert.AreEqual(pTester.pButtonClicked, pButtonB);
+            Assert.AreEqual(pPrefab.iButton_A_ClickCount, 0);
+            Assert.AreEqual(pTester.iButton_A_ClickCount, 2);
+
+            Assert.AreEqual(pPrefab.iButton_B_ClickCount, 0);
+            Assert.AreEqual(pTester.iButton_B_ClickCount, 1);
         }
 
         // ====================================================================================== //
@@ -119,15 +165,12 @@ namespace Tests
             public bool bToggleA_Input { get; private set; }
             public bool bToggleB_Input { get; private set; }
 
-            public Toggle pToggleB { get; private set; }
-
             public void Reset()
             {
                 bToggleA_Input = false;
                 bToggleB_Input = false;
 
                 iToggle_A_ClickCount = 0;
-                pToggleB = null;
             }
 
             [UIToggleCall(EToggleName.Toggle_A)]
@@ -145,10 +188,9 @@ namespace Tests
             }
 
             [UIToggleCall(EToggleName.Toggle_B)]
-            public void 토글_B_콜(bool bToggle, Toggle pToggleInstance)
+            public void 토글_B_콜(bool bToggle)
             {
                 bToggleB_Input = bToggle;
-                pToggleB = pToggleInstance;
             }
         }
 
@@ -180,32 +222,32 @@ namespace Tests
         }
 
 
-        [Test]
-        public void 인자가_2개있는_토글의_기능동작테스트()
-        {
-            // Arrange (데이터 정렬)
-            GameObject pObjectTester = new GameObject(nameof(인자가_2개있는_토글의_기능동작테스트));
-            Toggle pToggleB = Create_ChildComponent<Toggle>(pObjectTester, HasUIToggleTester.EToggleName.Toggle_B.ToString());
-            Create_ChildComponent<Toggle>(pObjectTester, HasUIToggleTester.EToggleName.Toggle_A.ToString());
+        //[Test]
+        //public void 인자가_2개있는_토글의_기능동작테스트()
+        //{
+        //    // Arrange (데이터 정렬)
+        //    GameObject pObjectTester = new GameObject(nameof(인자가_2개있는_토글의_기능동작테스트));
+        //    Toggle pToggleB = Create_ChildComponent<Toggle>(pObjectTester, HasUIToggleTester.EToggleName.Toggle_B.ToString());
+        //    Create_ChildComponent<Toggle>(pObjectTester, HasUIToggleTester.EToggleName.Toggle_A.ToString());
 
 
-            HasUIToggleTester pTester = pObjectTester.AddComponent<HasUIToggleTester>();
-            pTester.Reset();
-            Assert.IsNull(pTester.pToggleB);
-            bool bToggleB_Value = pToggleB.isOn;
+        //    HasUIToggleTester pTester = pObjectTester.AddComponent<HasUIToggleTester>();
+        //    pTester.Reset();
+        //    Assert.IsNull(pTester.pToggleB);
+        //    bool bToggleB_Value = pToggleB.isOn;
 
 
-            // Act (실행)
-            UIActionAttributeSetter.DoSet_UIActionAttribute(pTester);
-            // 스크립트로 수동으로 버튼 A 클릭
-            pToggleB.OnPointerClick(_pPointerEventData);
+        //    // Act (실행)
+        //    UIActionAttributeSetter.DoSet_UIActionAttribute(pTester);
+        //    // 스크립트로 수동으로 버튼 A 클릭
+        //    pToggleB.OnPointerClick(_pPointerEventData);
 
 
 
-            // Assert(맞는지 체크)
-            Assert.AreNotEqual(bToggleB_Value, pToggleB.isOn);
-            Assert.AreEqual(pTester.pToggleB, pToggleB);
-        }
+        //    // Assert(맞는지 체크)
+        //    Assert.AreNotEqual(bToggleB_Value, pToggleB.isOn);
+        //    Assert.AreEqual(pTester.pToggleB, pToggleB);
+        //}
 
 
         // ====================================================================================== //
