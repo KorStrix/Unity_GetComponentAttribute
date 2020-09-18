@@ -1,13 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-namespace Tests
+namespace GetComponentAttribute_Test
 {
     public class UIActionAttribute_Test
     {
