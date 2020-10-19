@@ -140,9 +140,8 @@ public static class GetComponentAttributeSetter
         listMembers.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
         listMembers.AddRange(pType.GetProperties(BindingFlags.Public | BindingFlags.Instance));
         listMembers.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance));
-
-        var arrMembers_Filtered = listMembers.Where(p => p.GetCustomAttributes().Any());
-        foreach(var pMember in arrMembers_Filtered)
+        
+        foreach(var pMember in listMembers)
             DoUpdate_GetComponentAttribute(pMono, pClass_Anything, pMember);
     }
 
@@ -459,7 +458,7 @@ public static class Component_Extension
     {
         Component[] arrComponentFind = null;
         if (pComponentType == typeof(GameObject))
-            arrComponentFind = pTarget.transform.GetComponentsInChildren(typeof(Transform), true);
+            arrComponentFind = pTarget.transform.GetComponentsInChildren(typeof(Transform), bInclude_OnDisable);
         else
             arrComponentFind = pTarget.transform.GetComponentsInChildren(pComponentType, bInclude_OnDisable);
 
@@ -470,7 +469,7 @@ public static class Component_Extension
     {
         if (arrComponentFind == null)
             return new Component[0];
-
+        
         return arrComponentFind.Where(p => p.name.Equals(strObjectName)).ToArray();
     }
 }
@@ -501,5 +500,7 @@ public static class MemberInfo_Extension
             pProperty.SetValue(pTarget, pValue, null);
     }
 }
+
+
 
 #endregion

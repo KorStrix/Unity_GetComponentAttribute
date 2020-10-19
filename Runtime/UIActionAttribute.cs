@@ -83,11 +83,10 @@ public static class UIActionAttributeSetter
 
         // BindingFlags를 일일이 써야 잘 동작한다..
         Type pType = pClass_Anything.GetType();
-        List<MethodInfo> listMembers = new List<MethodInfo>(pType.GetMethods(BindingFlags.Public | BindingFlags.Instance));
-        listMembers.AddRange(pType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance));
+        List<MethodInfo> listMethod = new List<MethodInfo>(pType.GetMethods(BindingFlags.Public | BindingFlags.Instance));
+        listMethod.AddRange(pType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance));
 
-        var arrMembers_Filtered = listMembers.Where(p => p.GetCustomAttributes().Any());
-        foreach (var pMember in arrMembers_Filtered)
+        foreach (var pMember in listMethod)
             DoSet_UIActionAttribute(pMono, pClass_Anything, pMember);
     }
 
@@ -96,12 +95,9 @@ public static class UIActionAttributeSetter
         if (pMethodInfo == null)
             return;
 
-        IUIActionAttribute[] arrCustomAttributes = pMethodInfo.GetCustomAttributes(true).
-            OfType<IUIActionAttribute>().
-            ToArray();
+        Object[] arrCustomAttributes = pMethodInfo.GetCustomAttributes(true);
         if (arrCustomAttributes.Length == 0)
             return;
-
 
         Init_ButtonCallAttribute(pTargetMono, pMemberOwner, pMethodInfo, arrCustomAttributes.OfType<UIButtonCallAttribute>().ToArray());
         Init_ToggleCallAttribute(pTargetMono, pMemberOwner, pMethodInfo, arrCustomAttributes.OfType<UIToggleCallAttribute>().ToArray());
