@@ -59,11 +59,11 @@ jobs:
    
    
     # Upload Packages 폴더
-   - name: Upload site artifact
-     uses: actions/upload-artifact@v1
-     with:
-       name: Package
-       path: ${{ packagePath }}
+    - name: Upload site artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: Package
+        path: ${{ packagePath }}
 #
 #
 #
