@@ -201,6 +201,12 @@ public class GetComponentAttribute_Example : MonoBehaviour
 
 <br>
 
+## 주의사항
+
+Children 오브젝트가 너무 많을 경우 퍼포먼스 낭비가 심합니다.
+
+<br>
+
 # 그 외
 
 ### 참고한 프로젝트
