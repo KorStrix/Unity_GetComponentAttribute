@@ -13,7 +13,6 @@ env:
     
   # Deploy to main branch
   githubPageRepo: KorStrix/korstrix.github.io
-  targetFolder: project/getcomponentattribute
     
     
     
@@ -57,7 +56,17 @@ jobs:
         artifactsPath: ${{ matrix.testMode }}-artifacts
        
    
-   
+  deploy: # deploy Job을 선언합니다.
+    needs: testAllModes # build가 되면 실행됩니다.
+    runs-on: ubuntu-latest
+       
+       
+   steps:
+   - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
+     uses: actions/checkout@v2
+
+
+
     # Upload Packages 폴더
     - name: Upload site artifact
       uses: actions/upload-artifact@v1
@@ -66,28 +75,12 @@ jobs:
         path: ${{ env.packagePath }}
 
 
-  deploy: # deploy Job을 선언합니다.
-    needs: build # build가 되면 실행됩니다.
-    runs-on: ubuntu-latest
-       
-       
-    steps:
-    - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
-      uses: actions/checkout@v1
- 
- 
-#   # Download the generated documentation
-#   - name: Download site artifact
-#     uses: actions/download-artifact@v1
-#     with:
-#       name: _site
-#
-#
-#   - name: Deploy
-#     uses: JamesIves/github-pages-deploy-action@releases/v3
-#     with:
-#       ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }} # You need some setup, see https://github.com/JamesIves/github-pages-deploy-action
-#       BRANCH: master
-#       FOLDER: _site
-#       REPOSITORY_NAME: ${{ env.githubPageRepo }}
-#       TARGET_FOLDER: ${{ env.targetFolder }}/
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }} # You need some setup, see https://github.com/JamesIves/github-pages-deploy-action
+        BRANCH: master
+        FOLDER: ${{ env.packagePath }}
+        REPOSITORY_NAME: ${{ env.githubPageRepo }}
+        TARGET_FOLDER: /
+        CLEAN:true
