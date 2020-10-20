@@ -1,5 +1,5 @@
-# 이 워크플로는 UnitTest 실행 후 문제가 없으면 Packages를 Artifacts에 Upload를 합니다.
-name: Test and Upload Package
+# 이 워크플로는 Unity-UnitTest 실행 후 문제가 없으면 Packages를 Artifacts에 Upload를 합니다.
+name: UnityTest and Upload Package
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
        - workspace
 
 env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 # Require Unity Unit Test
   projectPath: UnityProject
     
