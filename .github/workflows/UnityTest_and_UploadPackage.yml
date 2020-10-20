@@ -61,9 +61,9 @@ jobs:
     runs-on: ubuntu-latest
        
        
-   steps:
-   - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
-     uses: actions/checkout@v2
+    steps:
+    - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
+      uses: actions/checkout@v2
 
 
 
@@ -83,4 +83,4 @@ jobs:
         FOLDER: ${{ env.packagePath }}
         REPOSITORY_NAME: ${{ env.githubPageRepo }}
         TARGET_FOLDER: /
-        CLEAN:true
+        CLEAN: true
