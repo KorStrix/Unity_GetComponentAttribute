@@ -1,0 +1,80 @@
+# 이 워크플로는 DocFX를 빌드하고 다른 Github Repo(이 경우엔 제 Github Page 블로그)에 커밋합니다.
+name: Build and Deploy
+
+# -master 브랜치에 push가 발생했을 경우
+on:
+  push:
+    # branches:
+      # - master
+
+
+jobs: # 잡들 선언
+
+  build: # build Job을 선언합니다.
+    runs-on: windows-latest # Required by DocFX #실행 환경은 DocFX가 윈도우를 필요로 해서 윈도우로
+    
+    strategy:
+      matrix:
+        unityProjectPath:
+          - Documentation
+
+    
+    steps: # 이 잡은 이 행동(action)들을 합니다.
+    - name: Checkout # 일단 이 Repo를 Checkout을 합니다.
+      uses: actions/checkout@v2
+      with:
+        ref: main
+    
+    
+    - name: Install DocFX
+      run: choco install -y docfx
+
+    
+    # Readme.md 파일을 document index로 옮긴 뒤 빌드를 시작합니다.
+    - name: Build DocFX
+      run: |
+        cp README.md ${{ matrix.unityProjectPath }}/index.md 
+        docfx ${{ matrix.unityProjectPath }}/docfx.json 
+       
+   
+   
+    # Upload the generated documentation
+    - name: Upload site artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: _site
+        path: ${{ matrix.unityProjectPath }}/_site # Must equals the 'build.dest' value on your docfx.json
+
+
+
+  deploy: # deploy Job을 선언합니다.
+    needs: build # build가 되면 실행됩니다.
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        githubPageRepo:
+        - KorStrix/korstrix.github.io
+        targetFolder:
+        - project/getcomponentattribute
+        
+        
+    steps:
+    - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
+      uses: actions/checkout@v1
+
+
+    # Download the generated documentation
+    - name: Download site artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: _site
+
+
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }} # You need some setup, see https://github.com/JamesIves/github-pages-deploy-action
+        BRANCH: master
+        FOLDER: _site
+        REPOSITORY_NAME: ${{ matrix.githubPageRepo }}
+        TARGET_FOLDER: ${{ matrix.targetFolder }}/

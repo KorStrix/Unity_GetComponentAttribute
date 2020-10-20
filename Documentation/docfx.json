@@ -1,0 +1,84 @@
+{
+	"metadata": [
+		{
+			"src": [
+				{
+					"src": "..",
+					"files": [
+						"*.csproj"
+					]
+				}
+			],
+			"globalNamespaceId": "Global",
+			"dest": "api",
+			"filter": "filterConfig.yml",
+			
+			"disableGitFeatures": false
+		}
+	],
+	"build": {
+		"globalMetadata": {
+			"_appTitle": "Example Title",
+			"_appFooter": "Example Footer",
+			
+			"_gitContribute": {
+				"repo": "https://github.com/KorStrix/Unity_GetComponentAttribute.git",
+				"branch": "main",
+				"apiSpecFolder": "Documentation/apiSpec"
+			},
+			
+			"newFileRepository": {
+				"branch": "master"
+			},
+			
+			"_gitUrlPattern": "github",
+			"_enableSearch": true
+		},
+		
+		
+		"xrefservice": [ "https://xref.docs.microsoft.com/query?uid={uid}" ],
+	
+		"overwrite": "apiSpec/**.md",
+		
+		"content": [
+			{
+				"files": [ "toc.yml", "index.md" ]
+			},
+			{
+                "src": "api",
+                "files": [ "**.yml", "**.md" ],
+				"dest": "api"
+            },
+            {
+                "src": "manual",
+                "files": [ "toc.yml", "**.md" ],
+				"dest": "manual"
+            }
+		],
+		
+		"resource": [
+			{
+				"files": [
+					"images/**"
+				]
+			}
+		],
+		
+		"template": [
+			"default",
+			"templates/unity_disqus",
+			"templates/mermaid_diagram"
+		],
+		
+		"dest": "_site",
+		"globalMetadataFiles": [],
+		"fileMetadataFiles": [],
+
+		"postProcessors": [],
+		"markdownEngineName": "markdig",
+		"noLangKeyword": false,
+		"keepFileLink": false,
+		"cleanupCacheHistory": false,
+		"disableGitFeatures": false,
+	}
+}
