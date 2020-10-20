@@ -8,12 +8,12 @@ on:
       - workspace
 
 env:
-  unityProjectPath: # Require DocFX Build
-    - Documentation
-  githubPageRepo: # Require Deploy
-    - KorStrix/korstrix.github.io
-  targetFolder:
-    - project/getcomponentattribute
+  # Require DocFX Build
+  unityProjectPath: Documentation
+  
+  # Require Deploy
+  githubPageRepo: KorStrix/korstrix.github.io
+  targetFolder: project/getcomponentattribute
     
 
 jobs: # 잡들 선언
