@@ -12,7 +12,7 @@ env:
   packagePath: Packages/GetComponentAttribute
     
   # Deploy to main branch
-  githubPageRepo: KorStrix/korstrix.github.io
+  githubPageRepo: KorStrix/Unity_GetComponentAttribute
     
     
     
