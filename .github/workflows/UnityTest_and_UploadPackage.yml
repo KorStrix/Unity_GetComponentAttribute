@@ -9,7 +9,7 @@ on:
 env:
   # Require Unity Unit Test
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  packagePath: Packages/GetComponentAtribute
+  packagePath: Packages/GetComponentAttribute
     
   # Deploy to main branch
   githubPageRepo: KorStrix/korstrix.github.io
@@ -64,19 +64,18 @@ jobs:
       with:
         name: Package
         path: ${{ env.packagePath }}
-#
-#
-#
-# deploy: # deploy Job을 선언합니다.
-#   needs: build # build가 되면 실행됩니다.
-#   runs-on: ubuntu-latest
-#       
-#       
-#   steps:
-#   - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
-#     uses: actions/checkout@v1
-#
-#
+
+
+  deploy: # deploy Job을 선언합니다.
+    needs: build # build가 되면 실행됩니다.
+    runs-on: ubuntu-latest
+       
+       
+    steps:
+    - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
+      uses: actions/checkout@v1
+ 
+ 
 #   # Download the generated documentation
 #   - name: Download site artifact
 #     uses: actions/download-artifact@v1
