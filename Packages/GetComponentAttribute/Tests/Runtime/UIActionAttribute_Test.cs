@@ -10,8 +10,6 @@ namespace GetComponentAttribute_Test
     {
         // 더미 클릭 이벤트 데이터
         PointerEventData _pPointerEventData = new PointerEventData(null);
-        
-
 
         public class HasUIButtonTester : MonoBehaviour
         {
