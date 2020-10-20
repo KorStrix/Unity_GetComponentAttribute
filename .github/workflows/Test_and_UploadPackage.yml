@@ -7,11 +7,9 @@ on:
        - workspace
 
 env:
-  # Unit Test
-  projectPath:
-    - UnityProject
-  # Deploy to main branch
-  githubPageRepo:
+  projectPath: # Require Unity Unit Test
+    - UnityProject  
+  githubPageRepo: # Require Deploy to main branch
     - KorStrix/korstrix.github.io
   targetFolder:
     - project/Template
