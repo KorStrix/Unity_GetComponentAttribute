@@ -10,7 +10,6 @@ env:
   # Unit Test
   projectPath:
     - UnityProject
-    
   # Deploy to main branch
   githubPageRepo:
     - KorStrix/korstrix.github.io
