@@ -36,7 +36,7 @@ jobs:
     
     
     - name: Cached
-    - uses: actions/cache@v1.1.0
+      uses: actions/cache@v1.1.0
       with:
         path: ${{ matrix.projectPath }}/Library
         key: Library-${{ matrix.projectPath }}
