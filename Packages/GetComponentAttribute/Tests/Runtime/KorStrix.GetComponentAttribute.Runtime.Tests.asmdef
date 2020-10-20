@@ -1,0 +1,17 @@
+{
+    "name": "KorStrix.GetComponentAttribute.Runtime.Tests",
+    "references": [
+        "KorStrix.GetComponentAttribute.Runtime"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

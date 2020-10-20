@@ -1,0 +1,15 @@
+{
+	"name" : "com.korstrix.getcomponentattribute",
+	"version": "1.0.0",
+	"displayName" :"GetComponent Attribute",
+	"description" :"GetComponent를 Attribute로 동작합니다.",
+	"unity": "2018.1",
+	"dependencies": {},
+	"keywords": ["utility","getcomponent","attribute"],
+	"author":
+	{
+		"name":"KorStrix",
+		"email":"korstrix@gmail.com",
+		"url":"https://discord.gg/9EGrJap"
+	}
+}

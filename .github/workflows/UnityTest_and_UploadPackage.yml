@@ -9,11 +9,11 @@ on:
 env:
   # Require Unity Unit Test
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  projectPath: UnityProject
+  packagePath: Packages/GetComponentAtribute
     
   # Deploy to main branch
   githubPageRepo: KorStrix/korstrix.github.io
-  targetFolder: project/Template
+  targetFolder: project/getcomponentattribute
     
     
     
@@ -51,7 +51,7 @@ jobs:
       id: tests
       uses: webbertakken/unity-test-runner@v1.4
       with:
-        projectPath: ${{ matrix.projectPath }}
+        # projectPath: ${{ matrix.projectPath }}
         unityVersion: ${{ matrix.unityVersion }}
         testMode: ${{ matrix.testMode }}
         artifactsPath: ${{ matrix.testMode }}-artifacts
@@ -62,8 +62,8 @@ jobs:
    - name: Upload site artifact
      uses: actions/upload-artifact@v1
      with:
-       name: _site
-       path: ${{ env.unityProjectPath }}/_site # Must equals the 'build.dest' value on your docfx.json
+       name: Package
+       path: ${{ packagePath }}
 #
 #
 #
