@@ -5,7 +5,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - workspace
+      - master
 
 env:
   # Require DocFX Build
@@ -26,7 +26,7 @@ jobs: # 잡들 선언
     - name: Checkout # 일단 이 Repo를 Checkout을 합니다.
       uses: actions/checkout@v2
       with:
-        ref: workspace
+        ref: master
     
     
     - name: Install DocFX
