@@ -122,13 +122,25 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase, IGetCo
 /// </summary>
 public static class GetComponentAttributeSetter
 {
+    static readonly UnityEngine.Object[] _EmptyUnityObjectArray = new UnityEngine.Object[0];
+    static readonly GameObject[] _EmptyGameObjectArray = new GameObject[0];
+    static readonly Object[] _EmptyObjectArray = new Object[0];
+    static readonly Type[] _EmptyTypeArray = new Type[0];
+    static readonly Type[] _BoolTypeArray = new[] { typeof(bool) };
+
     public static UnityEngine.Object[] ExtractSameNameArray(string strObjectName, UnityEngine.Object[] arrComponentFind)
     {
         if (arrComponentFind == null)
-            return new UnityEngine.Object[0];
+            return _EmptyUnityObjectArray;
 
         return arrComponentFind.Where(p => p.name.Equals(strObjectName)).ToArray();
     }
+
+    /// <summary>
+    /// 일일이 호출할 때마다 new로 만들기보다
+    /// Static으로 하나 놓고 다 쓰면 Clear하는 식으로..
+    /// </summary>
+    private static List<MemberInfo> _listMemberTemp = new List<MemberInfo>();
 
     public static void DoUpdate_GetComponentAttribute(MonoBehaviour pMono) =>  DoUpdate_GetComponentAttribute(pMono, pMono);
 
@@ -136,13 +148,15 @@ public static class GetComponentAttributeSetter
     {
         // BindingFlags를 일일이 써야 잘 동작한다..
         Type pType = pClass_Anything.GetType();
-        List<MemberInfo> listMembers = new List<MemberInfo>(pType.GetFields(BindingFlags.Public | BindingFlags.Instance));
-        listMembers.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
-        listMembers.AddRange(pType.GetProperties(BindingFlags.Public | BindingFlags.Instance));
-        listMembers.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance));
+        _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
+        // _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
+        _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
+        // _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance));
         
-        foreach(var pMember in listMembers)
+        foreach(var pMember in _listMemberTemp)
             DoUpdate_GetComponentAttribute(pMono, pClass_Anything, pMember);
+
+        _listMemberTemp.Clear();
     }
 
     public static void DoUpdate_GetComponentAttribute(MonoBehaviour pTargetMono, object pMemberOwner, MemberInfo pMemberInfo)
@@ -152,7 +166,7 @@ public static class GetComponentAttributeSetter
 
 
         Type pMemberType = pMemberInfo.MemberType();
-        IGetComponentAttribute[] arrCustomAttributes = pMemberInfo.GetCustomAttributes(true).OfType<IGetComponentAttribute>().ToArray();
+        IEnumerable<IGetComponentAttribute> arrCustomAttributes = pMemberInfo.GetCustomAttributes(true).OfType<IGetComponentAttribute>();
         foreach(var pGetComponentAttribute in arrCustomAttributes)
         {
             object pComponent = SetMember_FromGetComponent(pTargetMono, pMemberOwner, pMemberInfo, pMemberType, pGetComponentAttribute);
@@ -174,9 +188,10 @@ public static class GetComponentAttributeSetter
 
     public static object Event_GetComponent(MonoBehaviour pMono, Type pElementType)
     {
+
         // ReSharper disable once PossibleNullReferenceException
         MethodInfo getter = typeof(MonoBehaviour)
-                 .GetMethod("GetComponents", new Type[0])
+                 .GetMethod("GetComponents", _EmptyTypeArray)
                  .MakeGenericMethod(pElementType);
 
         return getter.Invoke(pMono, null);
@@ -184,7 +199,7 @@ public static class GetComponentAttributeSetter
 
     public static object Event_GetComponentInChildren(MonoBehaviour pMono, Type pElementType, bool bInclude_DeActive, bool bSearch_By_ComponentName, string strComponentName)
     {
-	    MethodInfo pGetMethod = typeof(MonoBehaviour).GetMethod("GetComponentsInChildren", new[] { typeof(bool) });
+        MethodInfo pGetMethod = typeof(MonoBehaviour).GetMethod("GetComponentsInChildren", _BoolTypeArray);
 
         if (pElementType.HasElementType)
 	        pElementType = pElementType.GetElementType();
@@ -218,12 +233,12 @@ public static class GetComponentAttributeSetter
 
         // ReSharper disable once PossibleNullReferenceException
         MethodInfo pGetMethod = typeof(MonoBehaviour).
-            GetMethod("GetComponentsInParent", new Type[] { }).
+            GetMethod("GetComponentsInParent", _EmptyTypeArray).
             MakeGenericMethod(pElementType);
 
         if (bTypeIsGameObject)
-            return Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pTargetMono, new object[] { }));
-        return pGetMethod.Invoke(pTargetMono, new object[] { });
+            return Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pTargetMono, _EmptyObjectArray));
+        return pGetMethod.Invoke(pTargetMono, _EmptyObjectArray);
     }
 
     // ====================================================================================================================
@@ -413,7 +428,9 @@ public static class GetComponentAttributeSetter
 
     private static void AddDictionary_OnValueIsCollection(MonoBehaviour pMono, Type pType_DictionaryValue, IGrouping<string, UnityEngine.Object> pGroup, Type pTypeChild_OnValueIsCollection, MethodInfo Method_Add, object pInstanceDictionary, Func<string, object> OnSelectDictionaryKey)
     {
+#if UNITY_EDITOR
         try
+#endif
         {
             var arrChildrenObject = pGroup.ToArray();
             if (pType_DictionaryValue.IsArray)
@@ -430,17 +447,19 @@ public static class GetComponentAttributeSetter
                     Method_Add.Invoke(pInstanceDictionary, new [] { OnSelectDictionaryKey(pGroup.Key), arrChildrenObject});
             }
         }
+#if UNITY_EDITOR
         catch (Exception e)
         {
             Debug.LogError(e, pMono);
         }
+#endif
     }
 
     private static GameObject[] Convert_TransformArray_To_GameObjectArray(object pObject)
     {
         Transform[] arrTransform = pObject as Transform[];
         if (arrTransform == null)
-            return new GameObject[0];
+            return _EmptyGameObjectArray;
 
         return arrTransform.Select(p => p.gameObject).ToArray();
     }
@@ -465,10 +484,12 @@ public static class Component_Extension
         return ExtractSameNameArray(strObjectName, arrComponentFind);
     }
 
+    static Component[] _EmptyComponentArray = new Component[0];
+
     public static Component[] ExtractSameNameArray(string strObjectName, Component[] arrComponentFind)
     {
         if (arrComponentFind == null)
-            return new Component[0];
+            return _EmptyComponentArray;
         
         return arrComponentFind.Where(p => p.name.Equals(strObjectName)).ToArray();
     }
