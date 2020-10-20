@@ -1,0 +1,95 @@
+# 이 워크플로는 UnitTest 실행 후 문제가 없으면 Packages를 Artifacts에 Upload를 합니다.
+name: Test and Upload Package
+
+on:
+  push:
+     branches:
+       - workspace
+
+env:
+  # Unit Test
+  projectPath:
+    - UnityProject
+    
+  # Deploy to main branch
+  githubPageRepo:
+    - KorStrix/korstrix.github.io
+  targetFolder:
+    - project/Template
+    
+    
+    
+jobs:
+  testAllModes:
+    name: Test in ${{ matrix.testMode }} on version ${{ matrix.unityVersion }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        unityVersion:
+          - 2018.4.22f1
+        testMode:
+          - playmode
+          - editmode
+    
+    
+    steps:
+    - name: Checkout # 일단 이 Repo를 Checkout을 합니다.
+      uses: actions/checkout@v2
+    
+    
+    - name: Cached
+    - uses: actions/cache@v1.1.0
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}
+          restore-keys: |
+            Library-
+
+    
+  # Test
+    - name: Run tests
+      id: tests
+      uses: webbertakken/unity-test-runner@v1.4
+      with:
+        projectPath: ${{ matrix.projectPath }}
+        unityVersion: ${{ matrix.unityVersion }}
+        testMode: ${{ matrix.testMode }}
+        artifactsPath: ${{ matrix.testMode }}-artifacts
+       
+   
+   
+    # Upload the generated documentation
+#   - name: Upload site artifact
+#     uses: actions/upload-artifact@v1
+#     with:
+#       name: _site
+#       path: ${{ env.unityProjectPath }}/_site # Must equals the 'build.dest' value on your docfx.json
+#
+#
+#
+# deploy: # deploy Job을 선언합니다.
+#   needs: build # build가 되면 실행됩니다.
+#   runs-on: ubuntu-latest
+#       
+#       
+#   steps:
+#   - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
+#     uses: actions/checkout@v1
+#
+#
+#   # Download the generated documentation
+#   - name: Download site artifact
+#     uses: actions/download-artifact@v1
+#     with:
+#       name: _site
+#
+#
+#   - name: Deploy
+#     uses: JamesIves/github-pages-deploy-action@releases/v3
+#     with:
+#       ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }} # You need some setup, see https://github.com/JamesIves/github-pages-deploy-action
+#       BRANCH: master
+#       FOLDER: _site
+#       REPOSITORY_NAME: ${{ env.githubPageRepo }}
+#       TARGET_FOLDER: ${{ env.targetFolder }}/

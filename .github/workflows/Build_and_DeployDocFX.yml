@@ -4,26 +4,32 @@ name: Build and Deploy
 # -master 브랜치에 push가 발생했을 경우
 on:
   push:
-    # branches:
-      # - master
+    branches:
+      - workspace
 
+env:
+  # DocFX Build
+  unityProjectPath:
+    - Documentation
+    
+  # Deploy
+  githubPageRepo:
+    - KorStrix/korstrix.github.io
+  targetFolder:
+    - project/getcomponentattribute
+    
 
 jobs: # 잡들 선언
 
   build: # build Job을 선언합니다.
     runs-on: windows-latest # Required by DocFX #실행 환경은 DocFX가 윈도우를 필요로 해서 윈도우로
     
-    strategy:
-      matrix:
-        unityProjectPath:
-          - Documentation
-
     
     steps: # 이 잡은 이 행동(action)들을 합니다.
     - name: Checkout # 일단 이 Repo를 Checkout을 합니다.
       uses: actions/checkout@v2
       with:
-        ref: main
+        ref: workspace
     
     
     - name: Install DocFX
@@ -33,8 +39,8 @@ jobs: # 잡들 선언
     # Readme.md 파일을 document index로 옮긴 뒤 빌드를 시작합니다.
     - name: Build DocFX
       run: |
-        cp README.md ${{ matrix.unityProjectPath }}/index.md 
-        docfx ${{ matrix.unityProjectPath }}/docfx.json 
+        cp README.md ${{ env.unityProjectPath }}/index.md 
+        docfx ${{ env.unityProjectPath }}/docfx.json 
        
    
    
@@ -43,24 +49,18 @@ jobs: # 잡들 선언
       uses: actions/upload-artifact@v1
       with:
         name: _site
-        path: ${{ matrix.unityProjectPath }}/_site # Must equals the 'build.dest' value on your docfx.json
+        path: ${{ env.unityProjectPath }}/_site # Must equals the 'build.dest' value on your docfx.json
 
 
 
   deploy: # deploy Job을 선언합니다.
     needs: build # build가 되면 실행됩니다.
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        githubPageRepo:
-        - KorStrix/korstrix.github.io
-        targetFolder:
-        - project/getcomponentattribute
-        
+    
         
     steps:
     - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
 
     # Download the generated documentation
@@ -76,5 +76,5 @@ jobs: # 잡들 선언
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }} # You need some setup, see https://github.com/JamesIves/github-pages-deploy-action
         BRANCH: master
         FOLDER: _site
-        REPOSITORY_NAME: ${{ matrix.githubPageRepo }}
-        TARGET_FOLDER: ${{ matrix.targetFolder }}/
+        REPOSITORY_NAME: ${{ env.githubPageRepo }}
+        TARGET_FOLDER: ${{ env.targetFolder }}/
