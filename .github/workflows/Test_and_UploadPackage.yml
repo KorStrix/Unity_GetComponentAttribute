@@ -7,7 +7,7 @@ on:
        - workspace
 
 env:
-# Require Unity Unit Test
+  # Require Unity Unit Test
   projectPath: UnityProject
     
   # Deploy to main branch
@@ -39,8 +39,8 @@ jobs:
     - name: Cached
       uses: actions/cache@v1.1.0
       with:
-        path: ${{ matrix.projectPath }}/Library
-        key: Library-${{ matrix.projectPath }}
+        path: Library
+        key: Library
         restore-keys: |
             Library-
 
@@ -57,12 +57,12 @@ jobs:
        
    
    
-    # Upload the generated documentation
-#   - name: Upload site artifact
-#     uses: actions/upload-artifact@v1
-#     with:
-#       name: _site
-#       path: ${{ env.unityProjectPath }}/_site # Must equals the 'build.dest' value on your docfx.json
+    # Upload Packages 폴더
+   - name: Upload site artifact
+     uses: actions/upload-artifact@v1
+     with:
+       name: _site
+       path: ${{ env.unityProjectPath }}/_site # Must equals the 'build.dest' value on your docfx.json
 #
 #
 #
