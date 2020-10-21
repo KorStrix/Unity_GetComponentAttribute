@@ -58,7 +58,8 @@ jobs: # 잡들 선언
     steps:
     - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
       uses: actions/checkout@v2
-       ref: workspace
+      with:
+        ref: workspace
 
     # Download the generated documentation
     - name: Download site artifact
