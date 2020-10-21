@@ -5,7 +5,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - master
+      - workspace
 
 env:
   # Require DocFX Build
