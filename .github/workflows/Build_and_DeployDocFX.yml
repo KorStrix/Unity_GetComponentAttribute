@@ -26,7 +26,7 @@ jobs: # 잡들 선언
     - name: Checkout # 일단 이 Repo를 Checkout을 합니다.
       uses: actions/checkout@v2
       with:
-        ref: master
+        ref: workspace
     
     
     - name: Install DocFX
@@ -58,7 +58,7 @@ jobs: # 잡들 선언
     steps:
     - name: Checkout # 새로운 job이기 때문에 다시 checkout을 해야 합니다.
       uses: actions/checkout@v2
-
+       ref: workspace
 
     # Download the generated documentation
     - name: Download site artifact
