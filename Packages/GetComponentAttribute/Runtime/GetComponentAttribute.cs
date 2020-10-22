@@ -11,7 +11,10 @@
  *	Awake에서 호출하시면 됩니다.
  *	
  *	Private 변수는 갱신되지 않습니다.
- *	
+ *
+ *  GetComponentAttribute관련 코드는 일부러 단일 파일에 관리하고 있습니다.
+ *  - Custom Package를 지원하지 않는 유니티 저버전에서 설치하기 용이하기 위함
+ *
  *	오리지널 소스 링크
  *	https://openlevel.postype.com/post/683269
    ============================================ */
@@ -23,47 +26,179 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using GetComponentAttributeCore;
 using Object = System.Object;
 
-public interface IGetComponentAttribute
+namespace GetComponentAttributeCore
 {
-    object GetComponent(MonoBehaviour pMono, Type pElementType);
-    bool bIsPrint_OnNotFound_GetComponent { get; }
+    /// <summary>
+    /// 이 네임스페이스의 Root Base Class
+    /// <para>목표는 <see cref="GetComponentAttributeSetter"/>가 <see cref="MonoBehaviour"/>의 변수/프로퍼티를 이 Attribute를 통해 할당하는 것입니다.</para>
+    /// </summary>
+    public interface IGetComponentAttribute
+    {
+        object GetComponent(MonoBehaviour pMono, Type pElementType);
+        bool bIsPrint_OnNotFound_GetComponent { get; }
+    }
+
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    public abstract class GetComponentAttributeBase : PropertyAttribute, IGetComponentAttribute
+    {
+        public bool bIsPrint_OnNotFound_GetComponent => bIsPrint_OnNotFound;
+        public bool bIsPrint_OnNotFound;
+
+        public abstract object GetComponent(MonoBehaviour pMono, Type pElementType);
+    }
+
+    public interface IGetComponentChildrenAttribute : IGetComponentAttribute
+    {
+        bool bSearch_By_ComponentName_ForGetComponent { get; }
+        string strComponentName_ForGetComponent { get; }
+    }
+
+    public static class CoreLogic
+    {
+        #region zero array는 필요시마다 new를 생성하기 보단 캐싱해서 사용
+
+        static readonly UnityEngine.Object[] _EmptyUnityObjectArray = new UnityEngine.Object[0];
+        static readonly GameObject[] _EmptyGameObjectArray = new GameObject[0];
+        static readonly Object[] _EmptyObjectArray = new Object[0];
+        static readonly Type[] _EmptyTypeArray = new Type[0];
+        static readonly Type[] _BoolTypeArray = new[] { typeof(bool) };
+
+        #endregion
+
+        public static object Event_GetComponent(MonoBehaviour pMono, Type pElementType)
+        {
+            // ReSharper disable once PossibleNullReferenceException
+            MethodInfo getter = typeof(MonoBehaviour)
+                     .GetMethod("GetComponents", _EmptyTypeArray)
+                     .MakeGenericMethod(pElementType);
+
+            return getter.Invoke(pMono, null);
+        }
+
+        public static object Event_GetComponentInChildren(MonoBehaviour pMono, Type pElementType, bool bInclude_DeActive, bool bSearch_By_ComponentName, string strComponentName)
+        {
+            MethodInfo pGetMethod = typeof(MonoBehaviour).GetMethod("GetComponentsInChildren", _BoolTypeArray);
+
+            if (pElementType.HasElementType)
+                pElementType = pElementType.GetElementType();
+
+            object pObjectReturn;
+            if (pElementType == typeof(GameObject))
+            {
+                pElementType = typeof(Transform);
+                // ReSharper disable once PossibleNullReferenceException
+                pGetMethod = pGetMethod.MakeGenericMethod(pElementType);
+                pObjectReturn = Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pMono, new object[] { bInclude_DeActive }));
+            }
+            else
+            {
+                // ReSharper disable once PossibleNullReferenceException
+                pGetMethod = pGetMethod.MakeGenericMethod(pElementType);
+                pObjectReturn = pGetMethod.Invoke(pMono, new object[] { bInclude_DeActive });
+            }
+
+            if (bSearch_By_ComponentName)
+                return ExtractSameNameArray(strComponentName, pObjectReturn as UnityEngine.Object[]);
+
+            return pObjectReturn;
+        }
+
+        public static object Event_GetComponentInParents(MonoBehaviour pTargetMono, Type pElementType)
+        {
+            bool bTypeIsGameObject = pElementType == typeof(GameObject);
+            if (bTypeIsGameObject)
+                pElementType = typeof(Transform);
+
+            // ReSharper disable once PossibleNullReferenceException
+            MethodInfo pGetMethod = typeof(MonoBehaviour).
+                GetMethod("GetComponentsInParent", _EmptyTypeArray).
+                MakeGenericMethod(pElementType);
+
+            if (bTypeIsGameObject)
+                return Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pTargetMono, _EmptyObjectArray));
+            return pGetMethod.Invoke(pTargetMono, _EmptyObjectArray);
+        }
+
+        public static UnityEngine.Object[] ExtractSameNameArray(string strObjectName, UnityEngine.Object[] arrComponentFind)
+        {
+            if (arrComponentFind == null)
+                return _EmptyUnityObjectArray;
+
+            return arrComponentFind.Where(p => p.name.Equals(strObjectName)).ToArray();
+        }
+
+
+        private static GameObject[] Convert_TransformArray_To_GameObjectArray(object pObject)
+        {
+            Transform[] arrTransform = pObject as Transform[];
+            if (arrTransform == null)
+                return _EmptyGameObjectArray;
+
+            return arrTransform.Select(p => p.gameObject).ToArray();
+        }
+    }
 }
 
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public abstract class GetComponentAttributeBase : PropertyAttribute, IGetComponentAttribute
-{
-    public bool bIsPrint_OnNotFound_GetComponent => bIsPrint_OnNotFound;
-    public bool bIsPrint_OnNotFound;
-
-    public abstract object GetComponent(MonoBehaviour pMono, Type pElementType);
-}
-
+/// <summary>
+/// <see cref="GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(MonoBehaviour)"/>함수 호출을 통해 
+/// <para><see cref="UnityEngine.Component.GetComponents(Type)"/>으로 변수/프로퍼티를 할당합니다.</para>
+/// </summary>
 public class GetComponentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pMono, Type pElementType)
     {
-        return GetComponentAttributeSetter.Event_GetComponent(pMono, pElementType);
+        return CoreLogic.Event_GetComponent(pMono, pElementType);
     }
 }
 
+/// <summary>
+/// <see cref="GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(MonoBehaviour)"/>함수 호출을 통해 
+/// <para><see cref="UnityEngine.Component.GetComponentInParent(Type)"/>으로 변수/프로퍼티를 할당합니다.</para>
+/// </summary>
 public class GetComponentInParentAttribute : GetComponentAttributeBase
 {
     public override object GetComponent(MonoBehaviour pMono, Type pElementType)
     {
-        return GetComponentAttributeSetter.Event_GetComponentInParents(pMono, pElementType);
+        return CoreLogic.Event_GetComponentInParents(pMono, pElementType);
     }
 }
 
 
-
-public interface IGetComponentChildrenAttribute : IGetComponentAttribute
-{
-    bool bSearch_By_ComponentName_ForGetComponent { get; }
-    string strComponentName_ForGetComponent { get; }
-}
-
+/// <summary>
+/// <see cref="GetComponentAttributeSetter.DoUpdate_GetComponentAttribute(MonoBehaviour)"/>함수 호출을 통해 
+/// <para><see cref="UnityEngine.Component.GetComponentsInChildren(Type)"/>으로 변수/프로퍼티를 할당합니다.</para>
+/// <remarks>성능을 우선한다면 <see cref="bInclude_DisableObject"/>값을 <see langword="false"/>로 하세요.</remarks>
+/// </summary>
+/// 
+/// <example>
+/// 다음은 사용 예시입니다.
+/// <code>
+/// [GetComponentInChildren()]
+/// public Rigidbody _rigidbody = null;
+///
+///
+/// Find ObjectName Component Example
+/// enum SomeEnum { First, Second }
+/// 
+/// [GetComponentInChildren(SomeEnum.First)]
+/// public Rigidbody _rigidbody = null;
+///
+/// [GetComponentInChildren("Second")]
+/// public Rigidbody _rigidbody { get; private set; }
+///
+///
+/// List Example
+/// [GetComponentInChildren]
+/// public List(Rigidbody) _rigidbodies = null; // = { Rigidbody(First) }, { Rigidbody(Second) }
+///
+/// Dictionary Example
+/// [GetComponentInChildren]
+/// public Dictionary(SomeEnum, Rigidbody) _rigidbodies {get; private set;} // = { First, Rigidbody } , { Second, Rigidbody }
+/// </code>
+/// </example>
 public class GetComponentInChildrenAttribute : GetComponentAttributeBase, IGetComponentChildrenAttribute
 {
     public bool bSearch_By_ComponentName_ForGetComponent => bSearch_By_ComponentName;
@@ -71,95 +206,125 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase, IGetCo
 
 
     public bool bSearch_By_ComponentName;
-    public bool bInclude_OnDisable;
+    public bool bInclude_DisableObject;
     public string strComponentName;
 
-    public GetComponentInChildrenAttribute(bool bInclude_OnDisable = true)
+    /// <summary>
+    /// <see cref="UnityEngine.Component.GetComponentsInChildren(Type)"/>을 호출하여 자식 컴포넌트를 찾아 할당합니다.
+    /// </summary>
+    /// <param name="bInclude_DisableObject">Disable 된 오브젝트까지 포함할 지</param>
+    public GetComponentInChildrenAttribute(bool bInclude_DisableObject = true)
     {
         bSearch_By_ComponentName = false;
-        this.bInclude_OnDisable = bInclude_OnDisable;
+        this.bInclude_DisableObject = bInclude_DisableObject;
     }
 
-    public GetComponentInChildrenAttribute(bool bInclude_OnDisable, bool bIsPrint_OnNotFound = true)
+    /// <summary>
+    /// <see cref="UnityEngine.Component.GetComponentsInChildren(Type)"/>을 호출하여 자식 컴포넌트를 찾아 할당합니다.
+    /// </summary>
+    /// <param name="bInclude_DisableObject">Disable 된 오브젝트까지 포함할 지</param>
+    /// <param name="bIsPrint_OnNotFound">오브젝트를 못찾았을 경우 <see cref="Debug.LogError(Object)"/>를 출력할 지</param>
+    public GetComponentInChildrenAttribute(bool bInclude_DisableObject, bool bIsPrint_OnNotFound = true)
     {
-        this.bInclude_OnDisable = bInclude_OnDisable;
+        this.bInclude_DisableObject = bInclude_DisableObject;
         bSearch_By_ComponentName = false;
         this.bIsPrint_OnNotFound = bIsPrint_OnNotFound;
     }
 
-    public GetComponentInChildrenAttribute(Object pComponentName)
+    /// <summary>
+    /// <see cref="UnityEngine.Component.GetComponentsInChildren(Type)"/>을 호출하여 자식 컴포넌트를 찾아 할당합니다.
+    /// </summary>
+    /// <param name="pFindComponentName">여기엔 <see cref="string"/>혹은 <see cref="System.Enum"/> 타입만 들어가야 합니다. 찾고자 하는 컴포넌트 이름입니다.</param>
+    public GetComponentInChildrenAttribute(Object pFindComponentName)
     {
-        bInclude_OnDisable = true;
-        strComponentName = pComponentName.ToString();
+        bInclude_DisableObject = true;
+        strComponentName = pFindComponentName.ToString();
         bSearch_By_ComponentName = true;
     }
 
-    public GetComponentInChildrenAttribute(Object pComponentName, bool bInclude_OnDisable)
+    /// <summary>
+    /// <see cref="UnityEngine.Component.GetComponentsInChildren(Type)"/>을 호출하여 자식 컴포넌트를 찾아 할당합니다.
+    /// </summary>
+    /// <param name="pFindComponentName">여기엔 <see cref="string"/>혹은 <see cref="System.Enum"/> 타입만 들어가야 합니다. 찾고자 하는 컴포넌트 이름입니다.</param>
+    /// <param name="bInclude_DisableObject">Disable 된 오브젝트까지 포함할 지</param>
+    public GetComponentInChildrenAttribute(Object pFindComponentName, bool bInclude_DisableObject)
     {
-        strComponentName = pComponentName.ToString();
+        strComponentName = pFindComponentName.ToString();
         bSearch_By_ComponentName = true;
-        this.bInclude_OnDisable = bInclude_OnDisable;
+        this.bInclude_DisableObject = bInclude_DisableObject;
     }
 
-    public GetComponentInChildrenAttribute(Object pComponentName, bool bInclude_OnDisable, bool bIsPrint_OnNotFound = true)
+    /// <summary>
+    /// <see cref="UnityEngine.Component.GetComponentsInChildren(Type)"/>을 호출하여 자식 컴포넌트를 찾아 할당합니다.
+    /// </summary>
+    /// <param name="pFindComponentName">여기엔 <see cref="string"/>혹은 <see cref="System.Enum"/> 타입만 들어가야 합니다. 찾고자 하는 컴포넌트 이름입니다.</param>
+    /// <param name="bInclude_DisableObject">Disable 된 오브젝트까지 포함할 지</param>
+    /// <param name="bIsPrint_OnNotFound">오브젝트를 못찾았을 경우 <see cref="Debug.LogError(Object)"/>를 출력할 지</param>
+    public GetComponentInChildrenAttribute(Object pFindComponentName, bool bInclude_DisableObject, bool bIsPrint_OnNotFound = true)
     {
-        this.bInclude_OnDisable = bInclude_OnDisable;
+        this.bInclude_DisableObject = bInclude_DisableObject;
 
-        strComponentName = pComponentName.ToString();
+        strComponentName = pFindComponentName.ToString();
         bSearch_By_ComponentName = true;
         this.bIsPrint_OnNotFound = bIsPrint_OnNotFound;
     }
 
     public override object GetComponent(MonoBehaviour pMono, Type pElementType)
     {
-        return GetComponentAttributeSetter.Event_GetComponentInChildren(pMono, pElementType, bInclude_OnDisable, bSearch_By_ComponentName, strComponentName);
+        return CoreLogic.Event_GetComponentInChildren(pMono, pElementType, bInclude_DisableObject, bSearch_By_ComponentName, strComponentName);
     }
 }
 
 
 /// <summary>
-/// GetComponent Attribute가 적힌 필드 / 프로퍼티를 할당시켜주는 Static Class
+/// <see cref="GetComponentAttribute"/>가 있는 필드 / 프로퍼티를 할당시켜주는 <see langword="static"/> class
 /// </summary>
 public static class GetComponentAttributeSetter
 {
-    static readonly UnityEngine.Object[] _EmptyUnityObjectArray = new UnityEngine.Object[0];
-    static readonly GameObject[] _EmptyGameObjectArray = new GameObject[0];
-    static readonly Object[] _EmptyObjectArray = new Object[0];
-    static readonly Type[] _EmptyTypeArray = new Type[0];
-    static readonly Type[] _BoolTypeArray = new[] { typeof(bool) };
-
-    public static UnityEngine.Object[] ExtractSameNameArray(string strObjectName, UnityEngine.Object[] arrComponentFind)
-    {
-        if (arrComponentFind == null)
-            return _EmptyUnityObjectArray;
-
-        return arrComponentFind.Where(p => p.name.Equals(strObjectName)).ToArray();
-    }
-
     /// <summary>
     /// 일일이 호출할 때마다 new로 만들기보다
     /// Static으로 하나 놓고 다 쓰면 Clear하는 식으로..
     /// </summary>
     private static List<MemberInfo> _listMemberTemp = new List<MemberInfo>();
 
-    public static void DoUpdate_GetComponentAttribute(MonoBehaviour pMono) =>  DoUpdate_GetComponentAttribute(pMono, pMono);
 
-    public static void DoUpdate_GetComponentAttribute(MonoBehaviour pMono, object pClass_Anything)
+    /// <summary>
+    /// 매개변수로 넣는 모노비헤비어의 <see cref="GetComponentAttribute"/>를 붙인 필드/프로퍼티를 모두 찾아 할당합니다.
+    /// </summary>
+    /// <param name="pMonoTarget"><see cref="GetComponentAttribute"/>를 실행할 대상</param>
+    public static void DoUpdate_GetComponentAttribute(MonoBehaviour pMonoTarget) =>  DoUpdate_GetComponentAttribute(pMonoTarget, pMonoTarget);
+
+    /// <summary>
+    /// 매개변수로 넣는 클래스(아무 상속받지 않은 class도 가능)에서
+    /// <para><see cref="GetComponentAttribute"/>를 붙인 필드/프로퍼티를 매개변수로 넣은 모노비헤비어 기준으로 찾아 할당합니다.</para>
+    /// </summary>
+    /// <param name="pMonoTarget"><see cref="GetComponentAttribute"/>로 찾는 기준 대상</param>
+    /// <param name="pClass_AttributeOwner"><see cref="GetComponentAttribute"/>를 실행할 대상</param>
+    public static void DoUpdate_GetComponentAttribute(MonoBehaviour pMonoTarget, object pClass_AttributeOwner)
     {
+        Type pType = pClass_AttributeOwner.GetType();
         // BindingFlags를 일일이 써야 잘 동작한다..
-        Type pType = pClass_Anything.GetType();
-        _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
+        // _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
         // _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
-        _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
+        // _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
         // _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance));
+
+        // 위같았던 기억이 나는데 다시 이거로하니깐 잘됨;
+        // 퍼포먼스 문제때문에 최대한 줄이는게 맞음
+        _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
+        _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
         
         foreach(var pMember in _listMemberTemp)
-            DoUpdate_GetComponentAttribute(pMono, pClass_Anything, pMember);
+            DoUpdate_GetComponentAttribute(pMonoTarget, pClass_AttributeOwner, pMember);
 
         _listMemberTemp.Clear();
     }
 
-    public static void DoUpdate_GetComponentAttribute(MonoBehaviour pTargetMono, object pMemberOwner, MemberInfo pMemberInfo)
+    /// <summary>
+    /// 매개변수로 넣는 클래스(아무 상속받지 않은 class도 가능)에서
+    /// <para><see cref="GetComponentAttribute"/>를 붙인 필드/프로퍼티를 매개변수로 넣은 모노비헤비어 기준으로 찾아 할당합니다.</para>
+    /// </summary>
+    public static void DoUpdate_GetComponentAttribute(MonoBehaviour pMonoTarget, object pClass_AttributeOwner, MemberInfo pMemberInfo)
     {
         if (pMemberInfo == null)
             return;
@@ -169,76 +334,18 @@ public static class GetComponentAttributeSetter
         IEnumerable<IGetComponentAttribute> arrCustomAttributes = pMemberInfo.GetCustomAttributes(true).OfType<IGetComponentAttribute>();
         foreach(var pGetComponentAttribute in arrCustomAttributes)
         {
-            object pComponent = SetMember_FromGetComponent(pTargetMono, pMemberOwner, pMemberInfo, pMemberType, pGetComponentAttribute);
+            object pComponent = SetMember_FromGetComponent(pMonoTarget, pClass_AttributeOwner, pMemberInfo, pMemberType, pGetComponentAttribute);
             if (pComponent != null)
                 continue;
 
             if (pGetComponentAttribute.bIsPrint_OnNotFound_GetComponent)
             {
                 if (pGetComponentAttribute is GetComponentInChildrenAttribute pAttribute && pAttribute.bSearch_By_ComponentName)
-                    Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}>({2}) Result == null", pGetComponentAttribute.GetType().Name, pMemberType, pAttribute.strComponentName), pTargetMono);
+                    Debug.LogError(pMonoTarget.name + string.Format(".{0}<{1}>({2}) Result == null", pGetComponentAttribute.GetType().Name, pMemberType, pAttribute.strComponentName), pMonoTarget);
                 else
-                    Debug.LogError(pTargetMono.name + string.Format(".{0}<{1}> Result == null", pGetComponentAttribute.GetType().Name, pMemberType), pTargetMono);
+                    Debug.LogError(pMonoTarget.name + string.Format(".{0}<{1}> Result == null", pGetComponentAttribute.GetType().Name, pMemberType), pMonoTarget);
             }
         }
-    }
-
-    // ====================================================================================================================
-
-
-    public static object Event_GetComponent(MonoBehaviour pMono, Type pElementType)
-    {
-
-        // ReSharper disable once PossibleNullReferenceException
-        MethodInfo getter = typeof(MonoBehaviour)
-                 .GetMethod("GetComponents", _EmptyTypeArray)
-                 .MakeGenericMethod(pElementType);
-
-        return getter.Invoke(pMono, null);
-    }
-
-    public static object Event_GetComponentInChildren(MonoBehaviour pMono, Type pElementType, bool bInclude_DeActive, bool bSearch_By_ComponentName, string strComponentName)
-    {
-        MethodInfo pGetMethod = typeof(MonoBehaviour).GetMethod("GetComponentsInChildren", _BoolTypeArray);
-
-        if (pElementType.HasElementType)
-	        pElementType = pElementType.GetElementType();
-
-        object pObjectReturn;
-        if (pElementType == typeof(GameObject))
-        {
-            pElementType = typeof(Transform);
-            // ReSharper disable once PossibleNullReferenceException
-            pGetMethod = pGetMethod.MakeGenericMethod(pElementType);
-            pObjectReturn = Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pMono, new object[] {bInclude_DeActive}));
-        }
-        else
-        {
-            // ReSharper disable once PossibleNullReferenceException
-            pGetMethod = pGetMethod.MakeGenericMethod(pElementType);
-            pObjectReturn = pGetMethod.Invoke(pMono, new object[] { bInclude_DeActive });
-        }
-	 
-        if (bSearch_By_ComponentName)
-            return ExtractSameNameArray(strComponentName, pObjectReturn as UnityEngine.Object[]);
-
-        return pObjectReturn;
-    }
-
-    public static object Event_GetComponentInParents(MonoBehaviour pTargetMono, Type pElementType)
-    {
-        bool bTypeIsGameObject = pElementType == typeof(GameObject);
-        if (bTypeIsGameObject)
-            pElementType = typeof(Transform);
-
-        // ReSharper disable once PossibleNullReferenceException
-        MethodInfo pGetMethod = typeof(MonoBehaviour).
-            GetMethod("GetComponentsInParent", _EmptyTypeArray).
-            MakeGenericMethod(pElementType);
-
-        if (bTypeIsGameObject)
-            return Convert_TransformArray_To_GameObjectArray(pGetMethod.Invoke(pTargetMono, _EmptyObjectArray));
-        return pGetMethod.Invoke(pTargetMono, _EmptyObjectArray);
     }
 
     // ====================================================================================================================
@@ -454,47 +561,14 @@ public static class GetComponentAttributeSetter
         }
 #endif
     }
-
-    private static GameObject[] Convert_TransformArray_To_GameObjectArray(object pObject)
-    {
-        Transform[] arrTransform = pObject as Transform[];
-        if (arrTransform == null)
-            return _EmptyGameObjectArray;
-
-        return arrTransform.Select(p => p.gameObject).ToArray();
-    }
 }
 
 
+#region Extension
 
-#region ExtensionMethod
-
-public static class Component_Extension
-{
-    public static Component GetComponentInChildren_SameName(this Component pTarget, string strObjectName, Type pComponentType, bool bInclude_OnDisable) => GetComponentsInChildrenArray_SameName(pTarget, strObjectName, pComponentType, bInclude_OnDisable).FirstOrDefault();
-
-    public static Component[] GetComponentsInChildrenArray_SameName(this Component pTarget, string strObjectName, Type pComponentType, bool bInclude_OnDisable)
-    {
-        Component[] arrComponentFind = null;
-        if (pComponentType == typeof(GameObject))
-            arrComponentFind = pTarget.transform.GetComponentsInChildren(typeof(Transform), bInclude_OnDisable);
-        else
-            arrComponentFind = pTarget.transform.GetComponentsInChildren(pComponentType, bInclude_OnDisable);
-
-        return ExtractSameNameArray(strObjectName, arrComponentFind);
-    }
-
-    static Component[] _EmptyComponentArray = new Component[0];
-
-    public static Component[] ExtractSameNameArray(string strObjectName, Component[] arrComponentFind)
-    {
-        if (arrComponentFind == null)
-            return _EmptyComponentArray;
-        
-        return arrComponentFind.Where(p => p.name.Equals(strObjectName)).ToArray();
-    }
-}
-
+/// <summary>
+/// <see cref="GetComponentAttributeSetter"/>에서 편하게 사용하기 위한 <see cref="MemberInfo"/>용 확장 클래스
+/// </summary>
 public static class MemberInfo_Extension
 {
     public static Type MemberType(this MemberInfo pMemberInfo)
@@ -521,7 +595,5 @@ public static class MemberInfo_Extension
             pProperty.SetValue(pTarget, pValue, null);
     }
 }
-
-
 
 #endregion

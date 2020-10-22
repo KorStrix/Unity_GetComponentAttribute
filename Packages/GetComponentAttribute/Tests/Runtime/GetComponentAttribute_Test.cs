@@ -1,19 +1,16 @@
-using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace GetComponentAttribute_Test
 {
-
     public class Test_ComponentParents : MonoBehaviour { }
     public class Test_ComponentChild : MonoBehaviour { }
     public class Test_ComponentChild_SameName : MonoBehaviour { }
 
     public class Test_ComponentOnly : MonoBehaviour { }
 
-    [Category("StrixLibrary")]
+    [Category("GetComponentAttribute")]
     public class GetComponentAttribute_Test : MonoBehaviour
     {
         public enum ETestChildObject
