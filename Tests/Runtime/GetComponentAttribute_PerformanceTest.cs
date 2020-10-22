@@ -1,15 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace GetComponentAttribute_Test
 {
-
     public class Test_ComponentChild_ForPerformance : MonoBehaviour { }
 
-    [Category("StrixLibrary")]
+    [Category("GetComponentAttribute")]
     public class GetComponentAttribute_PerformanceTest : MonoBehaviour
     {
         public enum ETestChildObject
@@ -32,12 +29,6 @@ namespace GetComponentAttribute_Test
 
         [GetComponentInChildren]
         private Dictionary<ETestChildObject, GameObject> p_mapGameObject_KeyIsEnum = new Dictionary<ETestChildObject, GameObject>();
-
-        [GetComponentInChildren]
-        private Dictionary<string, Transform> p_mapTransform_KeyIsString = new Dictionary<string, Transform>();
-
-        [GetComponentInChildren]
-        private Dictionary<string, GameObject> p_mapGameObject_KeyIsString = new Dictionary<string, GameObject>();
 
 
         [GetComponentInChildren(nameof(ETestChildObject.TestObject_Other_FindString))]

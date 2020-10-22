@@ -12,14 +12,30 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using GetComponentAttributeCore_WIP;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using Object = System.Object;
 
-public interface IUIActionAttribute
+namespace GetComponentAttributeCore_WIP
 {
-    string strUIElementName { get; }
+    public interface IUIActionAttribute
+    {
+        string strUIElementName { get; }
+    }
+
+    public static class UnityEventExtension
+    {
+        public static int GetListenerNumber(this UnityEventBase unityEvent)
+        {
+            var field = typeof(UnityEventBase).GetField("m_Calls", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+            var invokeCallList = field.GetValue(unityEvent);
+            var property = invokeCallList.GetType().GetProperty("Count");
+            return (int)property.GetValue(invokeCallList);
+        }
+    }
 }
+
 
 /// <summary>
 /// <see cref="Button"/>이 클릭되었을 경우 해당 함수를 자동으로 호출합니다.
@@ -47,7 +63,7 @@ public class UIToggleCallAttribute : PropertyAttribute, IUIActionAttribute
 [AttributeUsage(AttributeTargets.Method)]
 public class UIButtonCallAttribute : PropertyAttribute, IUIActionAttribute
 {
-    public bool bIsInit = false;
+    public bool bIsInit;
     public string strUIElementName => strButtonName;
 
     public string strButtonName { get; private set; }
@@ -230,13 +246,3 @@ public static class UIActionAttributeSetter
     }
 }
 
-public static class UnityEventExtension
-{
-    public static int GetListenerNumber(this UnityEventBase unityEvent)
-    {
-        var field = typeof(UnityEventBase).GetField("m_Calls", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
-        var invokeCallList = field.GetValue(unityEvent);
-        var property = invokeCallList.GetType().GetProperty("Count");
-        return (int)property.GetValue(invokeCallList);
-    }
-}
