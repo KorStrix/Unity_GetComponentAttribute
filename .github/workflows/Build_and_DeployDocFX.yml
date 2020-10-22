@@ -12,7 +12,7 @@ env:
   unityProjectPath: Documentation
   
   # Require Deploy
-  githubPageRepo: KorStrix/korstrix.github.io
+  githubPageRepo: Korstrix/korstrix.github.io
   targetFolder: project/getcomponentattribute
     
 
