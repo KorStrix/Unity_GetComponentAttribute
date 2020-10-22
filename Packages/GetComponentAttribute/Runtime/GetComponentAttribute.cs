@@ -180,7 +180,7 @@ public class GetComponentInParentAttribute : GetComponentAttributeBase
 /// public Rigidbody _rigidbody = null;
 ///
 ///
-/// Find ObjectName Component Example
+/// // Find ObjectName Component Example
 /// enum SomeEnum { First, Second }
 /// 
 /// [GetComponentInChildren(SomeEnum.First)]
@@ -190,11 +190,11 @@ public class GetComponentInParentAttribute : GetComponentAttributeBase
 /// public Rigidbody _rigidbody { get; private set; }
 ///
 ///
-/// List Example
+/// // List Example
 /// [GetComponentInChildren]
 /// public List(Rigidbody) _rigidbodies = null; // = { Rigidbody(First) }, { Rigidbody(Second) }
 ///
-/// Dictionary Example
+/// // Dictionary Example
 /// [GetComponentInChildren]
 /// public Dictionary(SomeEnum, Rigidbody) _rigidbodies {get; private set;} // = { First, Rigidbody } , { Second, Rigidbody }
 /// </code>

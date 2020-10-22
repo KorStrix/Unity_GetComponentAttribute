@@ -64,7 +64,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\GetComponentAttribute\Runtime\Component_Extension.cs" />
-    <Compile Include="Packages\GetComponentAttribute\Runtime\Example\UIActionAttribute_Example.cs" />
     <Compile Include="Packages\GetComponentAttribute\Runtime\GetComponentAttribute.cs" />
     <Compile Include="Packages\GetComponentAttribute\Runtime\UIActionAttribute.cs" />
     <Reference Include="UnityEngine.AIModule">
