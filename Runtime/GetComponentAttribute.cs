@@ -281,18 +281,18 @@ public class GetComponentInChildrenAttribute : GetComponentAttributeBase, IGetCo
 /// </summary>
 public static class GetComponentAttributeSetter
 {
-    /// <summary>
-    /// 일일이 호출할 때마다 new로 만들기보다
-    /// Static으로 하나 놓고 다 쓰면 Clear하는 식으로..
-    /// </summary>
-    private static List<MemberInfo> _listMemberTemp = new List<MemberInfo>();
-
+    private static Dictionary<Type, List<MemberInfo>> _mapMemberInfo_Cached = new Dictionary<Type, List<MemberInfo>>();
 
     /// <summary>
     /// 매개변수로 넣는 모노비헤비어의 <see cref="GetComponentAttribute"/>를 붙인 필드/프로퍼티를 모두 찾아 할당합니다.
     /// </summary>
     /// <param name="pMonoTarget"><see cref="GetComponentAttribute"/>를 실행할 대상</param>
     public static void DoUpdate_GetComponentAttribute(MonoBehaviour pMonoTarget) =>  DoUpdate_GetComponentAttribute(pMonoTarget, pMonoTarget);
+
+    public static void DoClearCached()
+    {
+        _mapMemberInfo_Cached.Clear();
+    }
 
     /// <summary>
     /// 매개변수로 넣는 클래스(아무 상속받지 않은 class도 가능)에서
@@ -303,21 +303,40 @@ public static class GetComponentAttributeSetter
     public static void DoUpdate_GetComponentAttribute(MonoBehaviour pMonoTarget, object pClass_AttributeOwner)
     {
         Type pType = pClass_AttributeOwner.GetType();
-        // BindingFlags를 일일이 써야 잘 동작한다..
-        // _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
-        // _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
-        // _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
-        // _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance));
+        if (_mapMemberInfo_Cached.TryGetValue(pType, out var listMember) == false)
+        {
+            listMember = new List<MemberInfo>();
+            _mapMemberInfo_Cached.Add(pType, listMember);
 
-        // 위같았던 기억이 나는데 다시 이거로하니깐 잘됨;
-        // 퍼포먼스 문제때문에 최대한 줄이는게 맞음
-        _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
-        _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
-        
-        foreach(var pMember in _listMemberTemp)
+            // BindingFlags를 일일이 써야 잘 동작한다..
+            // _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
+            // _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance));
+            // _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
+            // _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance));
+
+            // 위같았던 기억이 나는데 다시 이거로하니깐 잘됨;
+            // 퍼포먼스 문제때문에 최대한 줄이는게 맞음
+            listMember.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
+            listMember.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
+        }
+
+
+        foreach (var pMember in listMember)
             DoUpdate_GetComponentAttribute(pMonoTarget, pClass_AttributeOwner, pMember);
 
-        _listMemberTemp.Clear();
+        if(pMonoTarget.gameObject.activeInHierarchy)
+            pMonoTarget.StartCoroutine(ClearCacheCoroutine(pType));
+    }
+
+    static IEnumerator ClearCacheCoroutine(Type pType)
+    {
+        yield return new WaitForSeconds(10f);
+
+        if (_mapMemberInfo_Cached.TryGetValue(pType, out var list))
+        {
+            list.Clear();
+            _mapMemberInfo_Cached.Remove(pType);
+        }
     }
 
     /// <summary>
@@ -329,9 +348,12 @@ public static class GetComponentAttributeSetter
         if (pMemberInfo == null)
             return;
 
+        Object[] arrAttributes = pMemberInfo.GetCustomAttributes(true);
+        if (arrAttributes.Length == 0)
+            return;
 
         Type pMemberType = pMemberInfo.MemberType();
-        IEnumerable<IGetComponentAttribute> arrCustomAttributes = pMemberInfo.GetCustomAttributes(true).OfType<IGetComponentAttribute>();
+        IEnumerable<IGetComponentAttribute> arrCustomAttributes = arrAttributes.OfType<IGetComponentAttribute>();
         foreach(var pGetComponentAttribute in arrCustomAttributes)
         {
             object pComponent = SetMember_FromGetComponent(pMonoTarget, pClass_AttributeOwner, pMemberInfo, pMemberType, pGetComponentAttribute);
@@ -523,14 +545,18 @@ public static class GetComponentAttributeSetter
 
     private static void AddDictionary(MonoBehaviour pMono, MethodInfo Method_Add, object pInstanceDictionary, UnityEngine.Object pUnityObject, Func<string, object> OnSelectDictionaryKey)
     {
+#if UNITY_EDITOR
         try
+#endif
         {
             Method_Add.Invoke(pInstanceDictionary, new [] { OnSelectDictionaryKey(pUnityObject.name), pUnityObject});
         }
+#if UNITY_EDITOR
         catch (Exception e)
         {
             Debug.LogError(pUnityObject.name + " GetComponent - GetComponent_OnDictionary - Overlap Key MonoType : " + pMono.GetType() + e, pMono);
         }
+#endif
     }
 
     private static void AddDictionary_OnValueIsCollection(MonoBehaviour pMono, Type pType_DictionaryValue, IGrouping<string, UnityEngine.Object> pGroup, Type pTypeChild_OnValueIsCollection, MethodInfo Method_Add, object pInstanceDictionary, Func<string, object> OnSelectDictionaryKey)
