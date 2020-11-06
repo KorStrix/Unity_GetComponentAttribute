@@ -9,8 +9,6 @@
  *	오리지널 소스코드의 경우 에디터 - Inspector에서 봐야만 갱신이 되었는데,
  *	현재는 SCManagerGetComponent.DoUpdateGetComponentAttribute 를 호출하면 갱신하도록 변경하였습니다.
  *	Awake에서 호출하시면 됩니다.
- *	
- *	Private 변수는 갱신되지 않습니다.
  *
  *  GetComponentAttribute관련 코드는 일부러 단일 파일에 관리하고 있습니다.
  *  - Custom Package를 지원하지 않는 유니티 저버전에서 설치하기 용이하기 위함
