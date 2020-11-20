@@ -311,8 +311,8 @@ public static class GetComponentAttributeSetter
         // 퍼포먼스 문제때문에 최대한 줄이는게 맞음
         _listMemberTemp.AddRange(pType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
         _listMemberTemp.AddRange(pType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance));
-        
-        foreach(var pMember in _listMemberTemp)
+
+        foreach (var pMember in _listMemberTemp)
             DoUpdate_GetComponentAttribute(pMonoTarget, pClass_AttributeOwner, pMember);
 
         _listMemberTemp.Clear();
